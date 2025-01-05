@@ -35,7 +35,7 @@ for file in "${files[@]}"; do
 done
 
 ln -sf $HOME/dotfiles/.zshrc $HOME/.zshrc
-# ln -sf $HOME/dotfiles/.vimrc $HOME/.vimrc
+ln -snf $HOME/dotfiles/nvim $HOME/.config/nvim
 ln -sf $HOME/dotfiles/.gitconfig $HOME/.gitconfig
 ln -sf $HOME/dotfiles/tmux/tmux.conf $HOME/.config/tmux/tmux.conf
 ln -sf $HOME/dotfiles/ohmyposh/catppuccin.omp.json $HOME/.config/ohmyposh/catppuccin.omp.json
