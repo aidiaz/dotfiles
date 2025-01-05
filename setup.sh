@@ -11,6 +11,7 @@ if [ ! -d "$config_folder" ]; then
   mkdir -p "$config_folder/tmux"
   mkdir -p "$config_folder/ohmyposh"
   echo "Folder created: $config_folder"
+  chmod -R 755 "$config_folder"
 else
   echo "Folder already exists: $config_folder, removing and recreating"
   rm -rf "$config_folder"
@@ -33,8 +34,9 @@ for file in "${files[@]}"; do
   fi
 done
 
-ln -s $HOME/dotfiles/.zshrc $HOME/.zshrc
-# ln -s $HOME/dotfiles/.vimrc $HOME/.vimrc
-ln -s $HOME/dotfiles/.gitconfig $HOME/.gitconfig
-ln -s $HOME/dotfiles/tmux/tmux.conf $HOME/.config/tmux/tmux.conf
-ln -s $HOME/dotfiles/ohmyposh/catppuccin.omp.json $HOME/.config/ohmyposh/catppuccin.omp.json
+ln -sf $HOME/dotfiles/.zshrc $HOME/.zshrc
+# ln -sf $HOME/dotfiles/.vimrc $HOME/.vimrc
+ln -sf $HOME/dotfiles/.gitconfig $HOME/.gitconfig
+ln -sf $HOME/dotfiles/tmux/tmux.conf $HOME/.config/tmux/tmux.conf
+ln -sf $HOME/dotfiles/ohmyposh/catppuccin.omp.json $HOME/.config/ohmyposh/catppuccin.omp.json
+
