@@ -255,10 +255,22 @@ require("lazy").setup({
 	},
 	{
 		"christoomey/vim-tmux-navigator",
-    vim.keymap.set('n', 'C-h', ':TmuxNavigateLeft<CR>'),
-    vim.keymap.set('n', 'C-j', ':TmuxNavigateDown<CR>'),
-    vim.keymap.set('n', 'C-k', ':TmuxNavigateUp<CR>'),
-    vim.keymap.set('n', 'C-l', ':TmuxNavigateRight<CR>'),
+		vim.keymap.set("n", "C-h", ":TmuxNavigateLeft<CR>"),
+		vim.keymap.set("n", "C-j", ":TmuxNavigateDown<CR>"),
+		vim.keymap.set("n", "C-k", ":TmuxNavigateUp<CR>"),
+		vim.keymap.set("n", "C-l", ":TmuxNavigateRight<CR>"),
+	},
+	{
+		"vim-test/vim-test",
+		dependencies = {
+			"preservim/vimux",
+		},
+		vim.keymap.set("n", "<leader>t", ":TestNearest<CR>"),
+		vim.keymap.set("n", "<leader>T", ":TestFile<CR>"),
+		vim.keymap.set("n", "<leader>l", ":TestLast<CR>"),
+		vim.keymap.set("n", "<leader>a", ":TestSuite<CR>"),
+		vim.keymap.set("n", "<leader>o", ":TestVisit<CR>"),
+		vim.cmd("let test#strategy = 'vimux'"),
 	},
 	{
 		"zbirenbaum/copilot-cmp",
