@@ -1,5 +1,4 @@
 --[[
-
 =====================================================================
 ==================== READ THIS BEFORE CONTINUING ====================
 =====================================================================
@@ -252,6 +251,28 @@ require("lazy").setup({
 				topdelete = { text = "‾" },
 				changedelete = { text = "~" },
 			},
+		},
+	},
+	{
+		"zbirenbaum/copilot-cmp",
+		event = "InsertEnter",
+		config = function()
+			require("copilot_cmp").setup()
+		end,
+		dependencies = {
+			"zbirenbaum/copilot.lua",
+			cmd = "Copilot",
+			config = function()
+				require("copilot").setup({
+					suggestion = { enabled = false },
+					panel = { enabled = false },
+					filetypes = {
+						python = true, -- allow specific filetype
+						lua = true,
+						["*"] = false, -- disable for all other filetypes and ignore default `filetypes`
+					},
+				})
+			end,
 		},
 	},
 
@@ -832,6 +853,7 @@ require("lazy").setup({
 						-- set group index to 0 to skip loading LuaLS completions as lazydev recommends it
 						group_index = 0,
 					},
+					{ name = "copilot" },
 					{ name = "nvim_lsp" },
 					{ name = "luasnip" },
 					{ name = "path" },
