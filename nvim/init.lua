@@ -117,6 +117,15 @@ vim.schedule(function()
 	vim.opt.clipboard = "unnamedplus"
 end)
 
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "python",
+	callback = function()
+		-- Set the color column at the 80th character
+		vim.opt_local.colorcolumn = "80"
+		-- Customize the highlight group to a less intense red
+		vim.api.nvim_set_hl(0, "ColorColumn", { bg = "#FF5555" }) -- Softer red
+	end,
+})
 -- Enable break indent
 vim.opt.breakindent = true
 
