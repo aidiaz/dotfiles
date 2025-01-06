@@ -3,6 +3,7 @@
 # List of files to check
 
 config_folder="$HOME/.config"
+ssh_folder="$HOME/.ssh"
 
 # Check if the folder exists
 if [ ! -d "$config_folder" ]; then
@@ -20,7 +21,6 @@ else
   mkdir -p "$config_folder/ohmyposh"
 fi
 
-
 files=("$HOME/.zshrc" "$HOME/.gitconfig" "$HOME/.config/tmux/tmux.conf" "$HOME/.config/ohmyposh/catppuccin.omp.json")
 
 # Loop through each file
@@ -36,6 +36,7 @@ done
 
 ln -sf $HOME/dotfiles/.zshrc $HOME/.zshrc
 ln -snf $HOME/dotfiles/nvim $HOME/.config/nvim
+ln -snf $HOME/dotfiles/.ssh/config $HOME/.ssh/config
 ln -sf $HOME/dotfiles/.gitconfig $HOME/.gitconfig
 ln -sf $HOME/dotfiles/tmux/tmux.conf $HOME/.config/tmux/tmux.conf
 ln -sf $HOME/dotfiles/ohmyposh/catppuccin.omp.json $HOME/.config/ohmyposh/catppuccin.omp.json
