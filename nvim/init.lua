@@ -269,6 +269,7 @@ require("lazy").setup({
 		vim.keymap.set("n", "C-k", ":TmuxNavigateUp<CR>"),
 		vim.keymap.set("n", "C-l", ":TmuxNavigateRight<CR>"),
 	},
+
 	{
 		"vim-test/vim-test",
 		dependencies = {
@@ -280,6 +281,22 @@ require("lazy").setup({
 		vim.keymap.set("n", "<leader>a", ":TestSuite<CR>"),
 		vim.keymap.set("n", "<leader>o", ":TestVisit<CR>"),
 		vim.cmd("let test#strategy = 'vimux'"),
+	},
+	{
+		"linux-cultist/venv-selector.nvim",
+		dependencies = { "neovim/nvim-lspconfig", "nvim-telescope/telescope.nvim", "mfussenegger/nvim-dap-python" },
+		opts = {
+			-- Your options go here
+			-- name = "venv",
+			-- auto_refresh = false
+		},
+		event = "VeryLazy", -- Optional: needed only if you want to type `:VenvSelect` without a keymapping
+		keys = {
+			-- Keymap to open VenvSelector to pick a venv.
+			vim.keymap.set("n", "<leader>vs", ":VenvSelect<CR>"),
+			-- Keymap to retrieve the venv from a cache (the one previously used for the same project directory).
+			vim.keymap.set("n", "<leader>vc", ":VenvSelectCached<CR>"),
+		},
 	},
 	{
 		"zbirenbaum/copilot-cmp",
