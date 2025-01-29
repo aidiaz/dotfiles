@@ -70,7 +70,20 @@
           "background": "p:lavender",
           "type": "git",
           "style": "powerline"
-        }
+        },
+        {
+          "foreground": "p:text",
+          "background": "p:blue",
+          "powerline_symbol": "\ue0b4",
+          "properties": {
+              "display_mode": "environment",
+              "fetch_virtual_env": true,
+              "home_enabled": true
+          },
+          "style": "powerline",
+          "template": "({{ .Venv }})",
+          "type": "python"
+      }
       ]
     }
   ],
