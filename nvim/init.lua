@@ -279,6 +279,28 @@ require("lazy").setup({
 			end,
 		},
 	},
+	{
+		"nvim-orgmode/orgmode",
+		event = "VeryLazy",
+		ft = { "org" },
+		config = function()
+			-- Setup orgmode
+			require("orgmode").setup({
+				org_agenda_files = "~/orgfiles/**/*",
+				org_default_notes_file = "~/orgfiles/refile.org",
+				mappings = {
+					org_return_uses_meta_return = true,
+				},
+			})
+
+			-- NOTE: If you are using nvim-treesitter with ~ensure_installed = "all"~ option
+			-- add ~org~ to ignore_install
+			-- require('nvim-treesitter.configs').setup({
+			--   ensure_installed = 'all',
+			--   ignore_install = { 'org' },
+			-- })
+		end,
+	},
 
 	-- NOTE: Plugins can also be configured to run Lua code when they are loaded.
 	--
@@ -487,6 +509,8 @@ require("lazy").setup({
 				opts = {
 					ensure_installed = {
 						"pyright",
+						"black",
+						"flake8",
 					},
 				},
 				config = true,
