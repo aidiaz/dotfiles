@@ -5,6 +5,13 @@ return {
 		event = { "BufReadPre", "BufNewFile" },
 		config = function()
 			local lint = require("lint")
+			lint.linters.flake8.args = function()
+				local config_path = vim.fn.findfile(".flake8", ".;")
+				if config_path == "" then
+					return {}
+				end
+				return { "--config", config_path }
+			end
 			lint.linters_by_ft = {
 				markdown = { "markdownlint" },
 				python = { "flake8" },
