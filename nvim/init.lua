@@ -228,7 +228,6 @@ require("lazy").setup({
 		vim.keymap.set("n", "C-k", ":TmuxNavigateUp<CR>"),
 		vim.keymap.set("n", "C-l", ":TmuxNavigateRight<CR>"),
 	},
-
 	{
 		"vim-test/vim-test",
 		dependencies = {
@@ -500,28 +499,48 @@ require("lazy").setup({
 	},
 	{ "Bilal2453/luvit-meta", lazy = true },
 	{
+		"kdheepak/lazygit.nvim",
+		lazy = true,
+		cmd = {
+			"LazyGit",
+			"LazyGitConfig",
+			"LazyGitCurrentFile",
+			"LazyGitFilter",
+			"LazyGitFilterCurrentFile",
+		},
+		-- optional for floating window border decoration
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+		},
+		-- setting the keybinding for LazyGit with 'keys' is recommended in
+		-- order to load the plugin when the command is run for the first time
+		keys = {
+			{ "<leader>lg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
+		},
+	},
+	{
 		"m-demare/hlargs.nvim",
 		opts = {
-      color = "#ef9062",
-      use_colorpalette = false,
-      colorpalette = {
-        { fg = "#ef9062" },
-        { fg = "#3AC6BE" },
-        { fg = "#35D27F" },
-        { fg = "#EB75D6" },
-        { fg = "#E5D180" },
-        { fg = "#8997F5" },
-        { fg = "#D49DA5" },
-        { fg = "#7FEC35" },
-        { fg = "#F6B223" },
-        { fg = "#F67C1B" },
-        { fg = "#DE9A4E" },
-        { fg = "#BBEA87" },
-        { fg = "#EEF06D" },
-        { fg = "#8FB272" },
-      },
-      excluded_filetypes = { "lua", "rust", "typescript", "typescriptreact", "javascript", "javascriptreact" },
-    },
+			color = "#ef9062",
+			use_colorpalette = false,
+			colorpalette = {
+				{ fg = "#ef9062" },
+				{ fg = "#3AC6BE" },
+				{ fg = "#35D27F" },
+				{ fg = "#EB75D6" },
+				{ fg = "#E5D180" },
+				{ fg = "#8997F5" },
+				{ fg = "#D49DA5" },
+				{ fg = "#7FEC35" },
+				{ fg = "#F6B223" },
+				{ fg = "#F67C1B" },
+				{ fg = "#DE9A4E" },
+				{ fg = "#BBEA87" },
+				{ fg = "#EEF06D" },
+				{ fg = "#8FB272" },
+			},
+			excluded_filetypes = { "lua", "rust", "typescript", "typescriptreact", "javascript", "javascriptreact" },
+		},
 	},
 	{
 		-- Main LSP Configuration
@@ -533,8 +552,14 @@ require("lazy").setup({
 				opts = {
 					ensure_installed = {
 						"pyright",
+						"json-lsp",
 						"black",
 						"flake8",
+						"json-lint",
+						"yaml-language-server",
+						"yaml-lint",
+						"docker-compose-language-service",
+						"dockerfile-language-server",
 					},
 				},
 				config = true,
@@ -813,6 +838,8 @@ require("lazy").setup({
 				lua = { "stylua" },
 				-- Conform can also run multiple formatters sequentially
 				python = { "black" },
+				yaml = { "prettier" },
+				json = { "jsonlint" },
 				--
 				-- You can use 'stop_after_first' to run the first available formatter from the list
 				-- javascript = { "prettierd", "prettier", stop_after_first = true },
@@ -857,7 +884,8 @@ require("lazy").setup({
 				},
 			},
 			"saadparwaiz1/cmp_luasnip",
-
+			"rafamadriz/friendly-snippets",
+			"onsails/lspkind-nvim",
 			-- Adds other completion capabilities.
 			--  nvim-cmp does not ship with all sources by default. They are split
 			--  into multiple repos for maintenance purposes.
@@ -868,8 +896,9 @@ require("lazy").setup({
 			-- See `:help cmp`
 			local cmp = require("cmp")
 			local luasnip = require("luasnip")
+			local lspkind = require("lspkind")
 			luasnip.config.setup({})
-
+			require("luasnip.loaders.from_vscode").lazy_load()
 			cmp.setup({
 				snippet = {
 					expand = function(args)
@@ -1058,6 +1087,10 @@ require("lazy").setup({
 	{ -- Highlight, edit, and navigate code
 		"nvim-treesitter/nvim-treesitter",
 		build = ":TSUpdate",
+		dependencies = {
+			"windwp/nvim-ts-autotag",
+		},
+
 		main = "nvim-treesitter.configs", -- Sets main module to use for opts
 		-- [[ Configure Treesitter ]] See `:help nvim-treesitter`
 		opts = {
@@ -1074,6 +1107,8 @@ require("lazy").setup({
 				"vim",
 				"vimdoc",
 				"python",
+				"json",
+				"yaml",
 			},
 			-- Autoinstall languages that are not installed
 			auto_install = true,
@@ -1085,6 +1120,16 @@ require("lazy").setup({
 				additional_vim_regex_highlighting = { "ruby" },
 			},
 			indent = { enable = true, disable = { "ruby" } },
+			autotag = { enable = true },
+			incremental_selection = {
+				enable = true,
+				keymaps = {
+					init_selection = "<C-space>",
+					node_incremental = "<C-space>",
+					scope_incremental = false,
+					node_decremental = "<bs>",
+				},
+			},
 		},
 		-- There are additional nvim-treesitter modules that you can use to interact
 		-- with nvim-treesitter. You should go explore a few and see what interests you:
@@ -1106,9 +1151,9 @@ require("lazy").setup({
 	require("kickstart.plugins.debug"),
 	-- require 'kickstart.plugins.indent_line',
 	require("kickstart.plugins.lint"),
-	-- require 'kickstart.plugins.autopairs',
+	require("kickstart.plugins.autopairs"),
 	require("kickstart.plugins.neo-tree"),
-	-- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+	require("kickstart.plugins.gitsigns"), -- adds gitsigns recommend keymaps
 
 	-- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 	--    This is the easiest way to modularize your config.
