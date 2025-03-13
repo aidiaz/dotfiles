@@ -229,16 +229,10 @@ require("lazy").setup({
 		vim.keymap.set("n", "C-l", ":TmuxNavigateRight<CR>"),
 	},
 	{
-		"vim-test/vim-test",
-		dependencies = {
-			"preservim/vimux",
-		},
-		vim.keymap.set("n", "<leader>t", ":TestNearest<CR>"),
-		vim.keymap.set("n", "<leader>T", ":TestFile<CR>"),
-		vim.keymap.set("n", "<leader>l", ":TestLast<CR>"),
-		vim.keymap.set("n", "<leader>a", ":TestSuite<CR>"),
-		vim.keymap.set("n", "<leader>o", ":TestVisit<CR>"),
-		vim.cmd("let test#strategy = 'vimux'"),
+		"fei6409/log-highlight.nvim",
+		config = function()
+			require("log-highlight").setup({})
+		end,
 	},
 	{
 		"linux-cultist/venv-selector.nvim",
@@ -521,24 +515,8 @@ require("lazy").setup({
 	{
 		"m-demare/hlargs.nvim",
 		opts = {
-			color = "#ef9062",
-			use_colorpalette = false,
-			colorpalette = {
-				{ fg = "#ef9062" },
-				{ fg = "#3AC6BE" },
-				{ fg = "#35D27F" },
-				{ fg = "#EB75D6" },
-				{ fg = "#E5D180" },
-				{ fg = "#8997F5" },
-				{ fg = "#D49DA5" },
-				{ fg = "#7FEC35" },
-				{ fg = "#F6B223" },
-				{ fg = "#F67C1B" },
-				{ fg = "#DE9A4E" },
-				{ fg = "#BBEA87" },
-				{ fg = "#EEF06D" },
-				{ fg = "#8FB272" },
-			},
+			color = "#fab387",
+			-- use_colorpalette = true,
 			excluded_filetypes = { "lua", "rust", "typescript", "typescriptreact", "javascript", "javascriptreact" },
 		},
 	},
@@ -838,7 +816,6 @@ require("lazy").setup({
 				lua = { "stylua" },
 				-- Conform can also run multiple formatters sequentially
 				python = { "black" },
-				yaml = { "prettier" },
 				json = { "jsonlint" },
 				--
 				-- You can use 'stop_after_first' to run the first available formatter from the list
