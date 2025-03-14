@@ -570,15 +570,14 @@ require("lazy").setup({
 			{ "<leader>lg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
 		},
 	},
-	-- {
-	-- 	"m-demare/hlargs.nvim",
-	-- 	opts = {
-	-- 		color = "#fab387",
-	-- 		-- use_colorpalette = true,
-	-- 		excluded_filetypes = { "lua", "rust", "typescript", "typescriptreact", "javascript", "javascriptreact" },
-	-- 	},
-	-- },
-
+	{
+		"m-demare/hlargs.nvim",
+		opts = {
+			color = "#fab387",
+			-- use_colorpalette = true,
+			excluded_filetypes = { "lua", "rust", "typescript", "typescriptreact", "javascript", "javascriptreact" },
+		},
+	},
 	{
 		"akinsho/bufferline.nvim",
 		dependencies = {
