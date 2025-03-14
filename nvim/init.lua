@@ -222,6 +222,46 @@ require("lazy").setup({
 		},
 	},
 	{
+		"goolord/alpha-nvim",
+		-- dependencies = { 'echasnovski/mini.icons' },
+		dependencies = { "nvim-tree/nvim-web-devicons" },
+		config = function()
+			local startify = require("alpha.themes.startify")
+			-- available: devicons, mini, default is mini
+			-- if provider not loaded and enabled is true, it will try to use another provider
+			-- Set header
+			startify.section.header.val = {
+				"⠀⠀⠀⠀⠀⠀⠀⠙⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⠀⠀⠀⠀⠀⢺⣿⣿⡆⠀⠀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⡇⠀⠀⠀⠀⠀⠀⣾⢡⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢢⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⣿⣷⡦⠀⠀⠀⠀⢰⣿⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠃⣠⣾⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣿⣿⣆⠀⠀⠀⣾⣿⣿⣿⣷⠄⠀⠰⠤⣀⠀⠀⣴⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⠀⠀⠀⠀⠀⠃⢺⣿⣿⣿⣿⡄⠀⠀⣿⣿⢿⣿⣿⣦⣦⣦⣶⣼⣭⣼⣿⣿⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⣿⣿⣿⣷⡆⠂⣿⣿⣞⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢙⣿⣿⣿⣿⣷⠸⣿⣿⣿⣿⣿⣿⠟⠻⣿⣿⣿⣿⡿⣿⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠄⢿⣿⣿⣿⣿⡄⣿⣿⣿⣿⣿⣿⡀⢀⣿⣿⣿⣿⠀⢸⣿⣿⠅⠀⠀⠀⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⣿⣿⣿⣿⣇⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠁⠀⠀⠀⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠠⢐⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⠀⠀⠀⠀⢀⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⠀⠀⡀⣠⣾⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡔⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⠀⠀⢁⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⠀⠠⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣄⠀⠀⠀⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⠀⣀⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⠀⣻⣿⣿⣿⣿⣿⡟⠋⠙⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠙⢿⣿⣿⣿⣿⣿⣄⠀⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⣿⣿⣿⣿⣿⡿⠋⠀⠀⠀⢿⣿⣿⣿⣿⣿⣿⠿⢿⡿⠛⠋⠁⠀⠀⠈⠻⣿⣿⣿⣿⣿⣿⣅⠀⠀⠀⠀⠀",
+				"⠀⠀⠀⣿⣿⣿⣿⡟⠃⠀⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢻⣿⣿⣿⣿⣿⣤⡀⠀⠀⠀",
+				"⠀⠜⢠⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⢿⣿⣿⣿⣿⣿⣗⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣿⣿⣿⣿⣦⠄⣠⠀",
+				"⠠⢸⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣿⣿⣿⣿⣿⣿⣿",
+				"⠀⠛⣿⣿⣿⡿⠏⠀⠀⠀⠀⠀⠀⢳⣾⣿⣿⣿⣿⣿⣿⡶⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⣿⣿",
+				"⠀⢨⠀⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠙⣿⣿⡿⡿⠿⠛⠙⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⠏⠉⠻⠿⠟⠁",
+			}
+			startify.file_icons.provider = "devicons"
+
+			require("alpha").setup(startify.config)
+		end,
+	},
+	{
 		"christoomey/vim-tmux-navigator",
 		vim.keymap.set("n", "C-h", ":TmuxNavigateLeft<CR>"),
 		vim.keymap.set("n", "C-j", ":TmuxNavigateDown<CR>"),
@@ -250,27 +290,45 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>vc", ":VenvSelectCached<CR>"),
 		},
 	},
+	-- {
+	-- 	"zbirenbaum/copilot-cmp",
+	-- 	event = "InsertEnter",
+	-- 	config = function()
+	-- 		require("copilot_cmp").setup()
+	-- 	end,
+	-- 	dependencies = {
+	-- 		"zbirenbaum/copilot.lua",
+	-- 		cmd = "Copilot",
+	-- 		config = function()
+	-- 			require("copilot").setup({
+	-- 				suggestion = { enabled = false },
+	-- 				panel = { enabled = false },
+	-- 				filetypes = {
+	-- 					python = true, -- allow specific filetype
+	-- 					lua = true,
+	-- 					["*"] = false, -- disable for all other filetypes and ignore default `filetypes`
+	-- 				},
+	-- 			})
+	-- 		end,
+	-- 	},
+	-- },
 	{
-		"zbirenbaum/copilot-cmp",
-		event = "InsertEnter",
-		config = function()
-			require("copilot_cmp").setup()
-		end,
+		"CopilotC-Nvim/CopilotChat.nvim",
 		dependencies = {
-			"zbirenbaum/copilot.lua",
-			cmd = "Copilot",
-			config = function()
-				require("copilot").setup({
-					suggestion = { enabled = false },
-					panel = { enabled = false },
-					filetypes = {
-						python = true, -- allow specific filetype
-						lua = true,
-						["*"] = false, -- disable for all other filetypes and ignore default `filetypes`
-					},
-				})
-			end,
+			{ "github/copilot.vim" }, -- or zbirenbaum/copilot.lua
+			{ "nvim-lua/plenary.nvim", branch = "master" }, -- for curl, log and async functions
 		},
+		build = "make tiktoken", -- Only on MacOS or Linux
+		opts = {
+			-- See Configuration section for options
+		},
+		keys = {
+			{ "<leader>zc", "<cmd>:CopilotChat<CR>", mode = "n", desc = "Open Copilot Chat" },
+			{ "<leader>zr", "<cmd>:CopilotChatExplain<CR>", mode = "v", desc = "Explain Code" },
+			{ "<leader>ze", "<cmd>:CopilotChatReview<CR>", mode = "v", desc = "Review Code" },
+			{ "<leader>zg", "<cmd>:CopilotChatDocs<CR>", mode = "v", desc = "Generate Docs" },
+		},
+		-- See Commands section for default commands if you want to lazy load on them
 	},
 	{
 		"nvim-orgmode/orgmode",
@@ -512,12 +570,19 @@ require("lazy").setup({
 			{ "<leader>lg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
 		},
 	},
+	-- {
+	-- 	"m-demare/hlargs.nvim",
+	-- 	opts = {
+	-- 		color = "#fab387",
+	-- 		-- use_colorpalette = true,
+	-- 		excluded_filetypes = { "lua", "rust", "typescript", "typescriptreact", "javascript", "javascriptreact" },
+	-- 	},
+	-- },
+
 	{
-		"m-demare/hlargs.nvim",
-		opts = {
-			color = "#fab387",
-			-- use_colorpalette = true,
-			excluded_filetypes = { "lua", "rust", "typescript", "typescriptreact", "javascript", "javascriptreact" },
+		"akinsho/bufferline.nvim",
+		dependencies = {
+			"nvim-tree/nvim-web-devicons",
 		},
 	},
 	{
@@ -529,7 +594,7 @@ require("lazy").setup({
 				"williamboman/mason.nvim",
 				opts = {
 					ensure_installed = {
-						"pyright",
+						"basedpyright",
 						"json-lsp",
 						"black",
 						"flake8",
@@ -548,7 +613,6 @@ require("lazy").setup({
 			-- Useful status updates for LSP.
 			-- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
 			{ "j-hui/fidget.nvim", opts = {} },
-
 			-- Allows extra capabilities provided by nvim-cmp
 			"hrsh7th/cmp-nvim-lsp",
 		},
@@ -707,17 +771,19 @@ require("lazy").setup({
 			local servers = {
 				-- clangd = {},
 				-- gopls = {},
-				pyright = {
-					root_dir = function(fname)
-						return require("lspconfig/util").root_pattern(
-							".git",
-							"setup.py",
-							"setup.cfg",
-							"pyproject.toml",
-							"requirements.txt",
-							"Pipfile"
-						)(fname) or vim.fn.getcwd()
-					end,
+				basedpyright = {
+					execution_environment = {
+						root = function(fname)
+							return require("lspconfig/util").root_pattern(
+								".git",
+								"setup.py",
+								"setup.cfg",
+								"pyproject.toml",
+								"requirements.txt",
+								"Pipfile"
+							)(fname) or vim.fn.getcwd()
+						end,
+					},
 				},
 				-- rust_analyzer = {},
 				-- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -763,7 +829,7 @@ require("lazy").setup({
 
 			require("mason-lspconfig").setup({
 				ensure_installed = {
-					"pyright",
+					"basedpyright",
 				},
 				automatic_installation = true,
 				handlers = {
@@ -867,13 +933,13 @@ require("lazy").setup({
 			--  nvim-cmp does not ship with all sources by default. They are split
 			--  into multiple repos for maintenance purposes.
 			"hrsh7th/cmp-nvim-lsp",
+			"github/copilot.vim",
 			"hrsh7th/cmp-path",
 		},
 		config = function()
 			-- See `:help cmp`
 			local cmp = require("cmp")
 			local luasnip = require("luasnip")
-			local lspkind = require("lspkind")
 			luasnip.config.setup({})
 			require("luasnip.loaders.from_vscode").lazy_load()
 			cmp.setup({
@@ -947,6 +1013,13 @@ require("lazy").setup({
 					{ name = "luasnip" },
 					{ name = "path" },
 				},
+				opts = function(_, opts)
+					table.insert(opts.sources, 1, {
+						name = "copilot",
+						group_index = 1,
+						priority = 100,
+					})
+				end,
 			})
 		end,
 	},
