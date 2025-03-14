@@ -594,7 +594,7 @@ require("lazy").setup({
 				"williamboman/mason.nvim",
 				opts = {
 					ensure_installed = {
-						"basedpyright",
+						"pyright",
 						"json-lsp",
 						"black",
 						"flake8",
@@ -771,19 +771,17 @@ require("lazy").setup({
 			local servers = {
 				-- clangd = {},
 				-- gopls = {},
-				basedpyright = {
-					execution_environment = {
-						root = function(fname)
-							return require("lspconfig/util").root_pattern(
-								".git",
-								"setup.py",
-								"setup.cfg",
-								"pyproject.toml",
-								"requirements.txt",
-								"Pipfile"
-							)(fname) or vim.fn.getcwd()
-						end,
-					},
+				pyright = {
+					root_dir = function(fname)
+						return require("lspconfig/util").root_pattern(
+							".git",
+							"setup.py",
+							"setup.cfg",
+							"pyproject.toml",
+							"requirements.txt",
+							"Pipfile"
+						)(fname) or vim.fn.getcwd()
+					end,
 				},
 				-- rust_analyzer = {},
 				-- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -829,7 +827,7 @@ require("lazy").setup({
 
 			require("mason-lspconfig").setup({
 				ensure_installed = {
-					"basedpyright",
+					"pyright",
 				},
 				automatic_installation = true,
 				handlers = {
