@@ -9,6 +9,7 @@ Kickstart Guide:
       - Tutor
       - <enter key>
 
+vim.api.nvim_set_keymap("n", "<Right>", "<Nop>", { noremap = true, silent = true })
     (If you already know the Neovim basics, you can skip this step.)
 
   Once you've completed that, you can continue working through **AND READING** the rest
@@ -49,8 +50,9 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
+vim.api.nvim_set_keymap("n", "<Right>", "<Nop>", { noremap = true, silent = true })
 -- [[ Setting options ]]
 -- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!
@@ -76,15 +78,15 @@ vim.schedule(function()
 	vim.opt.clipboard = "unnamedplus"
 end)
 
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = "python",
-	callback = function()
-		-- Set the color column at the 80th character
-		vim.opt_local.colorcolumn = "80"
-		-- Customize the highlight group to a less intense red
-		vim.api.nvim_set_hl(0, "ColorColumn", { bg = "#FF5555" }) -- Softer red
-	end,
-})
+-- vim.api.nvim_create_autocmd("FileType", {
+-- 	pattern = "python",
+-- 	callback = function()
+-- 		-- Set the color column at the 80th character
+-- 		vim.opt_local.colorcolumn = "80"
+-- 		-- Customize the highlight group to a less intense red
+-- 		vim.api.nvim_set_hl(0, "ColorColumn", { bg = "#FF5555" }) -- Softer red
+-- 	end,
+-- })
 -- Enable break indent
 vim.opt.breakindent = true
 
@@ -169,7 +171,11 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 		vim.highlight.on_yank()
 	end,
 })
-
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.opt.foldcolumn = "0"
+vim.opt.foldtext = ""
+vim.o.foldlevel = 99
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -230,32 +236,28 @@ require("lazy").setup({
 			-- available: devicons, mini, default is mini
 			-- if provider not loaded and enabled is true, it will try to use another provider
 			-- Set header
-			startify.section.header.val = {
-				"⠀⠀⠀⠀⠀⠀⠀⠙⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⠀⠀⠀⠀⠀⢺⣿⣿⡆⠀⠀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⡇⠀⠀⠀⠀⠀⠀⣾⢡⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢢⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⣿⣷⡦⠀⠀⠀⠀⢰⣿⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠃⣠⣾⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣿⣿⣆⠀⠀⠀⣾⣿⣿⣿⣷⠄⠀⠰⠤⣀⠀⠀⣴⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⠀⠀⠀⠀⠀⠃⢺⣿⣿⣿⣿⡄⠀⠀⣿⣿⢿⣿⣿⣦⣦⣦⣶⣼⣭⣼⣿⣿⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⣿⣿⣿⣷⡆⠂⣿⣿⣞⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢙⣿⣿⣿⣿⣷⠸⣿⣿⣿⣿⣿⣿⠟⠻⣿⣿⣿⣿⡿⣿⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠄⢿⣿⣿⣿⣿⡄⣿⣿⣿⣿⣿⣿⡀⢀⣿⣿⣿⣿⠀⢸⣿⣿⠅⠀⠀⠀⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⣿⣿⣿⣿⣇⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠁⠀⠀⠀⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠠⢐⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⠀⠀⠀⠀⢀⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⠀⠀⡀⣠⣾⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡔⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⠀⠀⢁⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⠀⠠⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣄⠀⠀⠀⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⠀⣀⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⠀⣻⣿⣿⣿⣿⣿⡟⠋⠙⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠙⢿⣿⣿⣿⣿⣿⣄⠀⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⣿⣿⣿⣿⣿⡿⠋⠀⠀⠀⢿⣿⣿⣿⣿⣿⣿⠿⢿⡿⠛⠋⠁⠀⠀⠈⠻⣿⣿⣿⣿⣿⣿⣅⠀⠀⠀⠀⠀",
-				"⠀⠀⠀⣿⣿⣿⣿⡟⠃⠀⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢻⣿⣿⣿⣿⣿⣤⡀⠀⠀⠀",
-				"⠀⠜⢠⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⢿⣿⣿⣿⣿⣿⣗⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣿⣿⣿⣿⣦⠄⣠⠀",
-				"⠠⢸⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣿⣿⣿⣿⣿⣿⣿",
-				"⠀⠛⣿⣿⣿⡿⠏⠀⠀⠀⠀⠀⠀⢳⣾⣿⣿⣿⣿⣿⣿⡶⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⣿⣿",
-				"⠀⢨⠀⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠙⣿⣿⡿⡿⠿⠛⠙⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⠏⠉⠻⠿⠟⠁",
-			}
+			-- startify.section.header.val = {
+			-- 	"⠀⠀⠀⠀⠀⠀⠀⠙⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+			-- 	"⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⡇⠀⠀⠀⠀⠀⠀⣾⢡⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢢⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+			-- 	"⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⣿⣷⡦⠀⠀⠀⠀⢰⣿⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠃⣠⣾⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+			-- 	"⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣿⣿⣆⠀⠀⠀⣾⣿⣿⣿⣷⠄⠀⠰⠤⣀⠀⠀⣴⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+			-- 	"⠀⠀⠀⠀⠀⠀⠀⠀⠃⢺⣿⣿⣿⣿⡄⠀⠀⣿⣿⢿⣿⣿⣦⣦⣦⣶⣼⣭⣼⣿⣿⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+			-- 	"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⣿⣿⣿⣷⡆⠂⣿⣿⣞⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+			-- 	"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢙⣿⣿⣿⣿⣷⠸⣿⣿⣿⣿⣿⣿⠟⠻⣿⣿⣿⣿⡿⣿⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+			-- 	"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠄⢿⣿⣿⣿⣿⡄⣿⣿⣿⣿⣿⣿⡀⢀⣿⣿⣿⣿⠀⢸⣿⣿⠅⠀⠀⠀⠀⠀⠀⠀⠀",
+			-- 	"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⣿⣿⣿⣿⣇⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠁⠀⠀⠀⠀⠀⠀⠀⠀",
+			-- 	"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠠⢐⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+			-- 	"⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+			-- 	"⠀⠀⠀⠀⠀⡀⣠⣾⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡔⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+			-- 	"⠀⠀⠀⠀⠠⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣄⠀⠀⠀⠀⠀⠀⠀⠀",
+			-- 	"⠀⠀⠀⠀⣀⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀",
+			-- 	"⠀⠀⠀⠀⣻⣿⣿⣿⣿⣿⡟⠋⠙⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠙⢿⣿⣿⣿⣿⣿⣄⠀⠀⠀⠀⠀⠀",
+			-- 	"⠀⠀⠀⣿⣿⣿⣿⣿⡿⠋⠀⠀⠀⢿⣿⣿⣿⣿⣿⣿⠿⢿⡿⠛⠋⠁⠀⠀⠈⠻⣿⣿⣿⣿⣿⣿⣅⠀⠀⠀⠀⠀",
+			-- 	"⠀⠀⠀⣿⣿⣿⣿⡟⠃⠀⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢻⣿⣿⣿⣿⣿⣤⡀⠀⠀⠀",
+			-- 	"⠀⠜⢠⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⢿⣿⣿⣿⣿⣿⣗⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣿⣿⣿⣿⣦⠄⣠⠀",
+			-- 	"⠠⢸⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣿⣿⣿⣿⣿⣿⣿",
+			-- 	"⠀⢨⠀⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠙⣿⣿⡿⡿⠿⠛⠙⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⠏⠉⠻⠿⠟⠁",
+			-- }
 			startify.file_icons.provider = "devicons"
 
 			require("alpha").setup(startify.config)
@@ -290,28 +292,6 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>vc", ":VenvSelectCached<CR>"),
 		},
 	},
-	-- {
-	-- 	"zbirenbaum/copilot-cmp",
-	-- 	event = "InsertEnter",
-	-- 	config = function()
-	-- 		require("copilot_cmp").setup()
-	-- 	end,
-	-- 	dependencies = {
-	-- 		"zbirenbaum/copilot.lua",
-	-- 		cmd = "Copilot",
-	-- 		config = function()
-	-- 			require("copilot").setup({
-	-- 				suggestion = { enabled = false },
-	-- 				panel = { enabled = false },
-	-- 				filetypes = {
-	-- 					python = true, -- allow specific filetype
-	-- 					lua = true,
-	-- 					["*"] = false, -- disable for all other filetypes and ignore default `filetypes`
-	-- 				},
-	-- 			})
-	-- 		end,
-	-- 	},
-	-- },
 	{
 		"CopilotC-Nvim/CopilotChat.nvim",
 		dependencies = {
@@ -330,29 +310,6 @@ require("lazy").setup({
 		},
 		-- See Commands section for default commands if you want to lazy load on them
 	},
-	{
-		"nvim-orgmode/orgmode",
-		event = "VeryLazy",
-		ft = { "org" },
-		config = function()
-			-- Setup orgmode
-			require("orgmode").setup({
-				org_agenda_files = "~/orgfiles/**/*",
-				org_default_notes_file = "~/orgfiles/refile.org",
-				mappings = {
-					org_return_uses_meta_return = true,
-				},
-			})
-
-			-- NOTE: If you are using nvim-treesitter with ~ensure_installed = "all"~ option
-			-- add ~org~ to ignore_install
-			-- require('nvim-treesitter.configs').setup({
-			--   ensure_installed = 'all',
-			--   ignore_install = { 'org' },
-			-- })
-		end,
-	},
-
 	-- NOTE: Plugins can also be configured to run Lua code when they are loaded.
 	--
 	-- This is often very useful to both group configuration, as well as handle
@@ -570,14 +527,14 @@ require("lazy").setup({
 			{ "<leader>lg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
 		},
 	},
-	{
-		"m-demare/hlargs.nvim",
-		opts = {
-			color = "#fab387",
-			-- use_colorpalette = true,
-			excluded_filetypes = { "lua", "rust", "typescript", "typescriptreact", "javascript", "javascriptreact" },
-		},
-	},
+	-- {
+	-- 	"m-demare/hlargs.nvim",
+	-- 	opts = {
+	-- 		color = "#fab387",
+	-- 		-- use_colorpalette = true,
+	-- 		excluded_filetypes = { "lua", "rust", "typescript", "typescriptreact", "javascript", "javascriptreact" },
+	-- 	},
+	-- },
 	{
 		"akinsho/bufferline.nvim",
 		dependencies = {
@@ -593,7 +550,7 @@ require("lazy").setup({
 				"williamboman/mason.nvim",
 				opts = {
 					ensure_installed = {
-						"pyright",
+						"basedpyright",
 						"json-lsp",
 						"black",
 						"flake8",
@@ -770,7 +727,19 @@ require("lazy").setup({
 			local servers = {
 				-- clangd = {},
 				-- gopls = {},
-				pyright = {
+				-- pyright = {
+				-- 	root_dir = function(fname)
+				-- 		return require("lspconfig/util").root_pattern(
+				-- 			".git",
+				-- 			"setup.py",
+				-- 			"setup.cfg",
+				-- 			"pyproject.toml",
+				-- 			"requirements.txt",
+				-- 			"Pipfile"
+				-- 		)(fname) or vim.fn.getcwd()
+				-- 	end,
+				-- },
+				basedpyright = {
 					root_dir = function(fname)
 						return require("lspconfig/util").root_pattern(
 							".git",
@@ -781,6 +750,17 @@ require("lazy").setup({
 							"Pipfile"
 						)(fname) or vim.fn.getcwd()
 					end,
+					settings = {
+						basedpyright = {
+							analysis = {
+								diagnosticMode = "workspace",
+								typeCheckingMode = "basic",
+								inlayHints = {
+									callArgumentNames = true,
+								},
+							},
+						},
+					},
 				},
 				-- rust_analyzer = {},
 				-- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -826,7 +806,7 @@ require("lazy").setup({
 
 			require("mason-lspconfig").setup({
 				ensure_installed = {
-					"pyright",
+					"basedpyright",
 				},
 				automatic_installation = true,
 				handlers = {
@@ -887,6 +867,7 @@ require("lazy").setup({
 			formatters = {
 				black = {
 					prepend_args = {
+						"--fast",
 						"--line-length",
 						"79",
 					},
@@ -894,7 +875,12 @@ require("lazy").setup({
 			},
 		},
 	},
-
+	{
+		"lukas-reineke/virt-column.nvim",
+		config = function()
+			require("virt-column").setup({ char = "│", virtcolumn = "80" })
+		end,
+	},
 	{ -- Autocompletion
 		"hrsh7th/nvim-cmp",
 		event = "InsertEnter",
