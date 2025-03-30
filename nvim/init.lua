@@ -276,8 +276,36 @@ require("lazy").setup({
 			require("log-highlight").setup({})
 		end,
 	},
+	-- {
+	-- 	"mfussenegger/nvim-dap",
+	-- 	dependencies = {
+	-- 		"mfussenegger/nvim-dap-python",
+	-- 		"rcarriga/nvim-dap-ui",
+	-- 	},
+	-- 	config = function()
+	-- 		local dap = require("dap")
+	-- 		local dapui = require("dapui")
+	-- 		require("dapui").setup()
+	-- 		require("dap-python").setup()
+	-- 		dap.listeners.before.attach.dapui_config = function()
+	-- 			dapui.open()
+	-- 		end
+	-- 		dap.listeners.before.launch.dapui_config = function()
+	-- 			dapui.open()
+	-- 		end
+	-- 		dap.listeners.before.event_terminated.dapui_config = function()
+	-- 			dapui.close()
+	-- 		end
+	-- 		dap.listeners.before.event_exited.dapui_config = function()
+	-- 			dapui.close()
+	-- 		end
+	-- 		vim.keymap.set("n", "<leader>dc", dap.continue, { desc = "Continue" })
+	-- 		vim.keymap.set("n", "<leader>dt", dap.toggle_breakpoint, { desc = "Toggle Breakpoint" })
+	-- 	end,
+	-- },
 	{
 		"linux-cultist/venv-selector.nvim",
+		-- dependencies = { "neovim/nvim-lspconfig", "nvim-telescope/telescope.nvim" },
 		dependencies = { "neovim/nvim-lspconfig", "nvim-telescope/telescope.nvim", "mfussenegger/nvim-dap-python" },
 		opts = {
 			name = "venv",
@@ -295,7 +323,7 @@ require("lazy").setup({
 	{
 		"CopilotC-Nvim/CopilotChat.nvim",
 		dependencies = {
-			{ "github/copilot.vim" }, -- or zbirenbaum/copilot.lua
+			{ "zbirenbaum/copilot.lua" }, -- or zbirenbaum/copilot.lua
 			{ "nvim-lua/plenary.nvim", branch = "master" }, -- for curl, log and async functions
 		},
 		build = "make tiktoken", -- Only on MacOS or Linux
@@ -323,7 +351,51 @@ require("lazy").setup({
 	--
 	-- Then, because we use the `opts` key (recommended), the configuration runs
 	-- after the plugin has been loaded as `require(MODULE).setup(opts)`.
+	{
+		"Vigemus/iron.nvim",
+		keys = {
+			{ "<leader>i", vim.cmd.IronRepl, desc = "󱠤 Toggle REPL" },
+			{ "<leader>I", vim.cmd.IronRestart, desc = "󱠤 Restart REPL" },
 
+			-- these keymaps need no right-hand-side, since that is defined by the
+			-- plugin config further below
+			{ "+", mode = { "n", "x" }, desc = "󱠤 Send-to-REPL Operator" },
+			{ "++", desc = "󱠤 Send Line to REPL" },
+		},
+
+		-- since irons's setup call is `require("iron.core").setup`, instead of
+		-- `require("iron").setup` like other plugins would do, we need to tell
+		-- lazy.nvim which module to via the `main` key
+		main = "iron.core",
+
+		opts = {
+			keymaps = {
+				send_line = "++",
+				visual_send = "+",
+				send_motion = "+",
+			},
+			config = {
+				-- This defines how the repl is opened. Here, we set the REPL window
+				-- to open in a horizontal split to the bottom, with a height of 10.
+				repl_open_cmd = "vertical bot 100 split",
+
+				-- This defines which binary to use for the REPL. If `ipython` is
+				-- available, it will use `ipython`, otherwise it will use `python3`.
+				-- since the python repl does not play well with indents, it's
+				-- preferable to use `ipython` or `bypython` here.
+				-- (see: https://github.com/Vigemus/iron.nvim/issues/348)
+				repl_definition = {
+					python = {
+						command = function()
+							local ipythonAvailable = vim.fn.executable("ipython") == 1
+							local binary = ipythonAvailable and "ipython" or "python3"
+							return { binary }
+						end,
+					},
+				},
+			},
+		},
+	},
 	{ -- Useful plugin to show you pending keybinds.
 		"folke/which-key.nvim",
 		event = "VimEnter", -- Sets the loading event to 'VimEnter'
@@ -541,6 +613,7 @@ require("lazy").setup({
 			"nvim-tree/nvim-web-devicons",
 		},
 	},
+	-- { "jay-babu/mason-nvim-dap.nvim" },
 	{
 		-- Main LSP Configuration
 		"neovim/nvim-lspconfig",
@@ -553,6 +626,8 @@ require("lazy").setup({
 						"basedpyright",
 						"json-lsp",
 						"black",
+						"debugpy",
+						"markdownlint",
 						"flake8",
 						"json-lint",
 						"yaml-language-server",
@@ -699,14 +774,14 @@ require("lazy").setup({
 			})
 
 			-- Change diagnostic symbols in the sign column (gutter)
-			-- if vim.g.have_nerd_font then
-			--   local signs = { ERROR = '', WARN = '', INFO = '', HINT = '' }
-			--   local diagnostic_signs = {}
-			--   for type, icon in pairs(signs) do
-			--     diagnostic_signs[vim.diagnostic.severity[type]] = icon
-			--   end
-			--   vim.diagnostic.config { signs = { text = diagnostic_signs } }
-			-- end
+			if vim.g.have_nerd_font then
+				local signs = { ERROR = "", WARN = "", INFO = "", HINT = "" }
+				local diagnostic_signs = {}
+				for type, icon in pairs(signs) do
+					diagnostic_signs[vim.diagnostic.severity[type]] = icon
+				end
+				vim.diagnostic.config({ signs = { text = diagnostic_signs } })
+			end
 
 			-- LSP servers and clients are able to communicate to each other what features they support.
 			--  By default, Neovim doesn't support everything that is in the LSP specification.
@@ -795,7 +870,9 @@ require("lazy").setup({
 			--
 			--  You can press `g?` for help in this menu.
 			require("mason").setup()
-
+			require("mason-nvim-dap").setup({
+				ensure_installed = { "python" },
+			})
 			-- You can add other tools here that you want Mason to install
 			-- for you, so that they are available from within Neovim.
 			local ensure_installed = vim.tbl_keys(servers or {})
@@ -822,7 +899,11 @@ require("lazy").setup({
 			})
 		end,
 	},
-
+	{
+		"dgagn/diagflow.nvim",
+		event = "LspAttach",
+		opts = {},
+	},
 	{ -- Autoformat
 		"stevearc/conform.nvim",
 		event = { "BufWritePre" },
@@ -876,6 +957,17 @@ require("lazy").setup({
 		},
 	},
 	{
+		"zbirenbaum/copilot.lua",
+		cmd = "Copilot",
+		event = "InsertEnter",
+		config = function()
+			require("copilot").setup({
+				suggestion = { enabled = false },
+				panel = { enabled = false },
+			})
+		end,
+	},
+	{
 		"lukas-reineke/virt-column.nvim",
 		config = function()
 			require("virt-column").setup({ char = "│", virtcolumn = "80" })
@@ -916,13 +1008,21 @@ require("lazy").setup({
 			--  nvim-cmp does not ship with all sources by default. They are split
 			--  into multiple repos for maintenance purposes.
 			"hrsh7th/cmp-nvim-lsp",
-			"github/copilot.vim",
+			"zbirenbaum/copilot-cmp",
 			"hrsh7th/cmp-path",
 		},
 		config = function()
 			-- See `:help cmp`
 			local cmp = require("cmp")
 			local luasnip = require("luasnip")
+			local lspkind = require("lspkind")
+			lspkind.init({
+				symbol_map = {
+					Copilot = "",
+				},
+			})
+
+			vim.api.nvim_set_hl(0, "CmpItemKindCopilot", { fg = "#6CC644" })
 			luasnip.config.setup({})
 			require("luasnip.loaders.from_vscode").lazy_load()
 			cmp.setup({
@@ -991,21 +1091,15 @@ require("lazy").setup({
 						-- set group index to 0 to skip loading LuaLS completions as lazydev recommends it
 						group_index = 0,
 					},
-					{ name = "copilot" },
+					{ name = "copilot", group_index = 2 },
 					{ name = "nvim_lsp" },
 					{ name = "luasnip" },
 					{ name = "path" },
 				},
-				opts = function(_, opts)
-					table.insert(opts.sources, 1, {
-						name = "copilot",
-						group_index = 1,
-						priority = 100,
-					})
-				end,
 			})
 		end,
 	},
+	{ "AndreM222/copilot-lualine" },
 	{
 		"nvim-lualine/lualine.nvim",
 		dependencies = { "nvim-tree/nvim-web-devicons" },
@@ -1034,7 +1128,7 @@ require("lazy").setup({
 					lualine_a = { "mode" },
 					lualine_b = { "branch", "diff", "diagnostics" },
 					lualine_c = { "filename" },
-					lualine_x = { "encoding", "fileformat", "filetype" },
+					lualine_x = { "copilot", "encoding", "fileformat", "filetype" },
 					lualine_y = { "progress" },
 					lualine_z = { "location" },
 				},
@@ -1060,18 +1154,25 @@ require("lazy").setup({
 		--
 		-- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
 		"catppuccin/nvim",
-		priority = 1000, -- Make sure to load this before all the other start plugins.
-		init = function()
+		priority = 1000,
+		config = function()
+			---@diagnostic disable-next-line: missing-fields
+			require("catppuccin").setup({
+				transparent_background = true,
+			})
+
 			-- Load the colorscheme here.
 			-- Like many other themes, this one has different styles, and you could load
 			-- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
 			vim.cmd.colorscheme("catppuccin-mocha")
-
-			-- You can configure highlights by doing something like:
-			vim.cmd.hi("Comment gui=none")
 		end,
 	},
-
+	{
+		"zbirenbaum/copilot-cmp",
+		config = function()
+			require("copilot_cmp").setup()
+		end,
+	},
 	-- Highlight todo, notes, etc in comments
 	{
 		"folke/todo-comments.nvim",
