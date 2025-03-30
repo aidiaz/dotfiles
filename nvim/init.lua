@@ -78,20 +78,11 @@ vim.schedule(function()
 	vim.opt.clipboard = "unnamedplus"
 end)
 
--- vim.api.nvim_create_autocmd("FileType", {
--- 	pattern = "python",
--- 	callback = function()
--- 		-- Set the color column at the 80th character
--- 		vim.opt_local.colorcolumn = "80"
--- 		-- Customize the highlight group to a less intense red
--- 		vim.api.nvim_set_hl(0, "ColorColumn", { bg = "#FF5555" }) -- Softer red
--- 	end,
--- })
 -- Enable break indent
 vim.opt.breakindent = true
 
 -- Save undo history
-vim.opt.undofile = true
+vim.opt.undofile = false
 
 -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
 vim.opt.ignorecase = true
@@ -276,36 +267,8 @@ require("lazy").setup({
 			require("log-highlight").setup({})
 		end,
 	},
-	-- {
-	-- 	"mfussenegger/nvim-dap",
-	-- 	dependencies = {
-	-- 		"mfussenegger/nvim-dap-python",
-	-- 		"rcarriga/nvim-dap-ui",
-	-- 	},
-	-- 	config = function()
-	-- 		local dap = require("dap")
-	-- 		local dapui = require("dapui")
-	-- 		require("dapui").setup()
-	-- 		require("dap-python").setup()
-	-- 		dap.listeners.before.attach.dapui_config = function()
-	-- 			dapui.open()
-	-- 		end
-	-- 		dap.listeners.before.launch.dapui_config = function()
-	-- 			dapui.open()
-	-- 		end
-	-- 		dap.listeners.before.event_terminated.dapui_config = function()
-	-- 			dapui.close()
-	-- 		end
-	-- 		dap.listeners.before.event_exited.dapui_config = function()
-	-- 			dapui.close()
-	-- 		end
-	-- 		vim.keymap.set("n", "<leader>dc", dap.continue, { desc = "Continue" })
-	-- 		vim.keymap.set("n", "<leader>dt", dap.toggle_breakpoint, { desc = "Toggle Breakpoint" })
-	-- 	end,
-	-- },
 	{
 		"linux-cultist/venv-selector.nvim",
-		-- dependencies = { "neovim/nvim-lspconfig", "nvim-telescope/telescope.nvim" },
 		dependencies = { "neovim/nvim-lspconfig", "nvim-telescope/telescope.nvim", "mfussenegger/nvim-dap-python" },
 		opts = {
 			name = "venv",
@@ -367,7 +330,6 @@ require("lazy").setup({
 		-- `require("iron").setup` like other plugins would do, we need to tell
 		-- lazy.nvim which module to via the `main` key
 		main = "iron.core",
-
 		opts = {
 			keymaps = {
 				send_line = "++",
@@ -378,7 +340,7 @@ require("lazy").setup({
 				-- This defines how the repl is opened. Here, we set the REPL window
 				-- to open in a horizontal split to the bottom, with a height of 10.
 				repl_open_cmd = "vertical bot 100 split",
-
+				ignore_blank_lines = true,
 				-- This defines which binary to use for the REPL. If `ipython` is
 				-- available, it will use `ipython`, otherwise it will use `python3`.
 				-- since the python repl does not play well with indents, it's
@@ -386,11 +348,8 @@ require("lazy").setup({
 				-- (see: https://github.com/Vigemus/iron.nvim/issues/348)
 				repl_definition = {
 					python = {
-						command = function()
-							local ipythonAvailable = vim.fn.executable("ipython") == 1
-							local binary = ipythonAvailable and "ipython" or "python3"
-							return { binary }
-						end,
+						command = { "ipython", "--no-autoindent" },
+						block_devider = { "# %%", "#%%" },
 					},
 				},
 			},
@@ -483,6 +442,7 @@ require("lazy").setup({
 
 			-- Useful for getting pretty icons, but requires a Nerd Font.
 			{ "nvim-tree/nvim-web-devicons", enabled = vim.g.have_nerd_font },
+			{ "catppuccin/nvim" },
 		},
 		config = function()
 			-- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -544,7 +504,6 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>/", function()
 				-- You can pass additional configuration to Telescope to change the theme, layout, etc.
 				builtin.current_buffer_fuzzy_find(require("telescope.themes").get_dropdown({
-					winblend = 10,
 					previewer = false,
 				}))
 			end, { desc = "[/] Fuzzily search in current buffer" })
@@ -591,29 +550,24 @@ require("lazy").setup({
 		},
 		-- optional for floating window border decoration
 		dependencies = {
+			"nvim-telescope/telescope.nvim",
 			"nvim-lua/plenary.nvim",
 		},
+		config = function()
+			require("telescope").load_extension("lazygit")
+		end,
 		-- setting the keybinding for LazyGit with 'keys' is recommended in
 		-- order to load the plugin when the command is run for the first time
 		keys = {
 			{ "<leader>lg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
 		},
 	},
-	-- {
-	-- 	"m-demare/hlargs.nvim",
-	-- 	opts = {
-	-- 		color = "#fab387",
-	-- 		-- use_colorpalette = true,
-	-- 		excluded_filetypes = { "lua", "rust", "typescript", "typescriptreact", "javascript", "javascriptreact" },
-	-- 	},
-	-- },
 	{
 		"akinsho/bufferline.nvim",
 		dependencies = {
 			"nvim-tree/nvim-web-devicons",
 		},
 	},
-	-- { "jay-babu/mason-nvim-dap.nvim" },
 	{
 		-- Main LSP Configuration
 		"neovim/nvim-lspconfig",
@@ -643,9 +597,19 @@ require("lazy").setup({
 
 			-- Useful status updates for LSP.
 			-- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-			{ "j-hui/fidget.nvim", opts = {} },
+			{
+				"j-hui/fidget.nvim",
+				opts = {
+					notification = {
+						window = {
+							winblend = 0,
+						},
+					},
+				},
+			},
 			-- Allows extra capabilities provided by nvim-cmp
 			"hrsh7th/cmp-nvim-lsp",
+			"catppuccin/nvim",
 		},
 		config = function()
 			-- Brief aside: **What is LSP?**
@@ -832,6 +796,8 @@ require("lazy").setup({
 								typeCheckingMode = "basic",
 								inlayHints = {
 									callArgumentNames = true,
+									callReturnTypes = true,
+									functionReturnTypes = true,
 								},
 							},
 						},
@@ -932,7 +898,7 @@ require("lazy").setup({
 					lsp_format_opt = "fallback"
 				end
 				return {
-					timeout_ms = 500,
+					timeout_ms = 5000,
 					lsp_format = lsp_format_opt,
 				}
 			end,
@@ -970,7 +936,14 @@ require("lazy").setup({
 	{
 		"lukas-reineke/virt-column.nvim",
 		config = function()
-			require("virt-column").setup({ char = "│", virtcolumn = "80" })
+			require("virt-column").setup({
+				exclude = {
+					filetypes = { "lua", "markdown", "json", "yaml" },
+				},
+				char = "│",
+				virtcolumn = "80",
+				highlight = "ErrorMsg",
+			})
 		end,
 	},
 	{ -- Autocompletion
@@ -1128,7 +1101,11 @@ require("lazy").setup({
 					lualine_a = { "mode" },
 					lualine_b = { "branch", "diff", "diagnostics" },
 					lualine_c = { "filename" },
-					lualine_x = { "copilot", "encoding", "fileformat", "filetype" },
+					lualine_x = {
+						"copilot",
+						"encoding",
+						"filetype",
+					},
 					lualine_y = { "progress" },
 					lualine_z = { "location" },
 				},
@@ -1159,12 +1136,25 @@ require("lazy").setup({
 			---@diagnostic disable-next-line: missing-fields
 			require("catppuccin").setup({
 				transparent_background = true,
+				flavor = "mocha",
+				integrations = {
+					cmp = true,
+					gitsigns = true,
+					nvimtree = true,
+					treesitter = true,
+					telescope = true,
+					notify = false,
+					mini = {
+						enabled = true,
+						indentscope_color = "",
+					},
+				},
 			})
 
 			-- Load the colorscheme here.
 			-- Like many other themes, this one has different styles, and you could load
 			-- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-			vim.cmd.colorscheme("catppuccin-mocha")
+			vim.cmd.colorscheme("catppuccin")
 		end,
 	},
 	{
@@ -1223,6 +1213,7 @@ require("lazy").setup({
 		build = ":TSUpdate",
 		dependencies = {
 			"windwp/nvim-ts-autotag",
+			"catppuccin/nvim",
 		},
 
 		main = "nvim-treesitter.configs", -- Sets main module to use for opts
@@ -1283,7 +1274,7 @@ require("lazy").setup({
 	--  Uncomment any of the lines below to enable them (you will need to restart nvim).
 	--
 	require("kickstart.plugins.debug"),
-	-- require 'kickstart.plugins.indent_line',
+	require("kickstart.plugins.indent_line"),
 	require("kickstart.plugins.lint"),
 	require("kickstart.plugins.autopairs"),
 	require("kickstart.plugins.neo-tree"),
