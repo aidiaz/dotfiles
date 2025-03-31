@@ -11,7 +11,7 @@ config.color_scheme = "Catppuccin Mocha"
 config.font_size = 14
 config.font = wezterm.font("JetBrains Mono Regular")
 config.enable_tab_bar = false
-
+config.harfbuzz_features = { "calt=0", "clig=0", "liga=0" }
 config.window_decorations = "RESIZE"
 config.window_background_opacity = 0.95
 config.macos_window_background_blur = 10
