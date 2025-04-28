@@ -218,6 +218,27 @@ require("lazy").setup({
 			},
 		},
 	},
+	-- {
+	-- 	"toppair/peek.nvim",
+	-- 	event = { "VeryLazy" },
+	-- 	build = "deno task --quiet build:fast",
+	-- 	config = function()
+	-- 		require("peek").setup({
+	-- 			app = "browser",
+	-- 		})
+	-- 		vim.api.nvim_create_user_command("PeekOpen", require("peek").open, {})
+	-- 		vim.api.nvim_create_user_command("PeekClose", require("peek").close, {})
+	-- 	end,
+	-- },
+	{
+		"iamcco/markdown-preview.nvim",
+		cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+		build = "cd app && npm install",
+		init = function()
+			vim.g.mkdp_filetypes = { "markdown" }
+		end,
+		ft = { "markdown" },
+	},
 	{
 		"goolord/alpha-nvim",
 		-- dependencies = { 'echasnovski/mini.icons' },
@@ -314,47 +335,63 @@ require("lazy").setup({
 	--
 	-- Then, because we use the `opts` key (recommended), the configuration runs
 	-- after the plugin has been loaded as `require(MODULE).setup(opts)`.
-	{
-		"Vigemus/iron.nvim",
-		keys = {
-			{ "<leader>i", vim.cmd.IronRepl, desc = "󱠤 Toggle REPL" },
-			{ "<leader>I", vim.cmd.IronRestart, desc = "󱠤 Restart REPL" },
-
-			-- these keymaps need no right-hand-side, since that is defined by the
-			-- plugin config further below
-			{ "+", mode = { "n", "x" }, desc = "󱠤 Send-to-REPL Operator" },
-			{ "++", desc = "󱠤 Send Line to REPL" },
-		},
-
-		-- since irons's setup call is `require("iron.core").setup`, instead of
-		-- `require("iron").setup` like other plugins would do, we need to tell
-		-- lazy.nvim which module to via the `main` key
-		main = "iron.core",
-		opts = {
-			keymaps = {
-				send_line = "++",
-				visual_send = "+",
-				send_motion = "+",
-			},
-			config = {
-				-- This defines how the repl is opened. Here, we set the REPL window
-				-- to open in a horizontal split to the bottom, with a height of 10.
-				repl_open_cmd = "vertical bot 100 split",
-				ignore_blank_lines = true,
-				-- This defines which binary to use for the REPL. If `ipython` is
-				-- available, it will use `ipython`, otherwise it will use `python3`.
-				-- since the python repl does not play well with indents, it's
-				-- preferable to use `ipython` or `bypython` here.
-				-- (see: https://github.com/Vigemus/iron.nvim/issues/348)
-				repl_definition = {
-					python = {
-						command = { "ipython", "--no-autoindent" },
-						block_devider = { "# %%", "#%%" },
-					},
-				},
-			},
-		},
-	},
+	-- {
+	-- 	"hkupty/iron.nvim",
+	-- 	config = function()
+	-- 		local iron = require("iron.core")
+	-- 		local view = require("iron.view")
+	-- 		local common = require("iron.fts.common")
+	--
+	-- 		iron.setup({
+	-- 			config = {
+	-- 				scratch_repl = true,
+	-- 				repl_definition = {
+	-- 					sh = {
+	-- 						command = { "zsh" },
+	-- 					},
+	-- 					python = {
+	-- 						command = { "ipython", "--no-autoindent" },
+	-- 						format = common.bracketed_paste_python,
+	-- 						block_deviders = { "# %%", "#%%" },
+	-- 					},
+	-- 				},
+	-- 				repl_filetype = function(bufnr, ft)
+	-- 					return ft
+	-- 				end,
+	-- 				repl_open_cmd = view.split.vertical.rightbelow(80),
+	-- 			},
+	--
+	-- 			keymaps = {
+	-- 				toggle_repl = "<space>rr",
+	-- 				restart_repl = "<space>rR",
+	-- 				send_motion = "<space>sc",
+	-- 				visual_send = "<space>sc",
+	-- 				send_file = "<space>sf",
+	-- 				send_line = "<space>sl",
+	-- 				send_paragraph = "<space>sp",
+	-- 				send_until_cursor = "<space>su",
+	-- 				send_mark = "<space>sm",
+	-- 				send_code_block = "<space>sb",
+	-- 				send_code_block_and_move = "<space>sn",
+	-- 				mark_motion = "<space>mc",
+	-- 				mark_visual = "<space>mc",
+	-- 				remove_mark = "<space>md",
+	-- 				cr = "<space>s<cr>",
+	-- 				interrupt = "<space>s<space>",
+	-- 				exit = "<space>sq",
+	-- 				clear = "<space>cl",
+	-- 			},
+	-- 			highlight = {
+	-- 				italic = true,
+	-- 			},
+	-- 			ignore_blank_lines = true,
+	-- 		})
+	--
+	-- 		-- Additional key mappings
+	-- 		vim.keymap.set("n", "<space>rf", "<cmd>IronFocus<cr>")
+	-- 		vim.keymap.set("n", "<space>rh", "<cmd>IronHide<cr>")
+	-- 	end,
+	-- },
 	{ -- Useful plugin to show you pending keybinds.
 		"folke/which-key.nvim",
 		event = "VimEnter", -- Sets the loading event to 'VimEnter'
@@ -411,7 +448,59 @@ require("lazy").setup({
 			},
 		},
 	},
-
+	{
+		"KnoP-01/rapid-for-vim",
+	},
+	-- {
+	-- 	"nomnivore/ollama.nvim",
+	-- 	dependencies = {
+	-- 		"nvim-lua/plenary.nvim",
+	-- 	},
+	--
+	-- 	-- All the user commands added by the plugin
+	-- 	cmd = { "Ollama", "OllamaModel", "OllamaServe", "OllamaServeStop" },
+	--
+	-- 	keys = {
+	-- 		-- Sample keybind for prompt menu. Note that the <c-u> is important for selections to work properly.
+	-- 		{
+	-- 			"<leader>oo",
+	-- 			":<c-u>lua require('ollama').prompt()<cr>",
+	-- 			desc = "ollama prompt",
+	-- 			mode = { "n", "v" },
+	-- 		},
+	--
+	-- 		-- Sample keybind for direct prompting. Note that the <c-u> is important for selections to work properly.
+	-- 		{
+	-- 			"<leader>oG",
+	-- 			":<c-u>lua require('ollama').prompt('Generate_Code')<cr>",
+	-- 			desc = "ollama Generate Code",
+	-- 			mode = { "n", "v" },
+	-- 		},
+	-- 	},
+	-- 	opts = {
+	-- 		-- $ docker run -d --rm --gpus=all -v <volume>:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
+	-- 		url = "http://127.0.0.1:11434",
+	-- 		model = "deepseek-r1",
+	-- 		serve = {
+	-- 			command = "docker",
+	-- 			args = {
+	-- 				"run",
+	-- 				"-d",
+	-- 				"--rm",
+	-- 				"--gpus=all",
+	-- 				"-v",
+	-- 				"ollama:/root/.ollama",
+	-- 				"-p",
+	-- 				"11434:11434",
+	-- 				"--name",
+	-- 				"ollama",
+	-- 				"ollama/ollama",
+	-- 			},
+	-- 			stop_command = "docker",
+	-- 			stop_args = { "stop", "ollama" },
+	-- 		},
+	-- 	},
+	-- },
 	-- NOTE: Plugins can specify dependencies.
 	--
 	-- The dependencies are proper plugin specifications as well - anything
@@ -439,7 +528,6 @@ require("lazy").setup({
 				end,
 			},
 			{ "nvim-telescope/telescope-ui-select.nvim" },
-
 			-- Useful for getting pretty icons, but requires a Nerd Font.
 			{ "nvim-tree/nvim-web-devicons", enabled = vim.g.have_nerd_font },
 			{ "catppuccin/nvim" },
@@ -563,10 +651,16 @@ require("lazy").setup({
 		},
 	},
 	{
-		"akinsho/bufferline.nvim",
-		dependencies = {
-			"nvim-tree/nvim-web-devicons",
+		"ray-x/lsp_signature.nvim",
+		event = "InsertEnter",
+		opts = {
+			bind = true,
+			handler_opts = {
+				border = "rounded",
+			},
 		},
+		-- or use config
+		-- config = function(_, opts) require'lsp_signature'.setup({you options}) end
 	},
 	{
 		-- Main LSP Configuration
@@ -586,6 +680,7 @@ require("lazy").setup({
 						"json-lint",
 						"yaml-language-server",
 						"yaml-lint",
+						"prettier",
 						"docker-compose-language-service",
 						"dockerfile-language-server",
 					},
@@ -796,8 +891,8 @@ require("lazy").setup({
 								typeCheckingMode = "basic",
 								inlayHints = {
 									callArgumentNames = true,
-									callReturnTypes = true,
 									functionReturnTypes = true,
+									colorArgumentNames = true,
 								},
 							},
 						},
@@ -823,7 +918,7 @@ require("lazy").setup({
 								callSnippet = "Replace",
 							},
 							-- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-							-- diagnostics = { disable = { 'missing-fields' } },
+							diagnostics = { disable = { "missing-fields" } },
 						},
 					},
 				},
@@ -865,11 +960,11 @@ require("lazy").setup({
 			})
 		end,
 	},
-	{
-		"dgagn/diagflow.nvim",
-		event = "LspAttach",
-		opts = {},
-	},
+	-- {
+	-- 	"dgagn/diagflow.nvim",
+	-- 	event = "LspAttach",
+	-- 	opts = {},
+	-- },
 	{ -- Autoformat
 		"stevearc/conform.nvim",
 		event = { "BufWritePre" },
@@ -906,7 +1001,7 @@ require("lazy").setup({
 				lua = { "stylua" },
 				-- Conform can also run multiple formatters sequentially
 				python = { "black" },
-				json = { "jsonlint" },
+				json = { "prettier" },
 				--
 				-- You can use 'stop_after_first' to run the first available formatter from the list
 				-- javascript = { "prettierd", "prettier", stop_after_first = true },
@@ -1064,7 +1159,7 @@ require("lazy").setup({
 						-- set group index to 0 to skip loading LuaLS completions as lazydev recommends it
 						group_index = 0,
 					},
-					{ name = "copilot", group_index = 2 },
+					{ name = "copilot" },
 					{ name = "nvim_lsp" },
 					{ name = "luasnip" },
 					{ name = "path" },
