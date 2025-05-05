@@ -611,7 +611,6 @@ require("lazy").setup({
 			end, { desc = "[S]earch [N]eovim files" })
 		end,
 	},
-
 	-- LSP Plugins
 	{
 		-- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
@@ -819,6 +818,34 @@ require("lazy").setup({
 					end
 				end,
 			})
+			-- Diagnostic Config
+			-- See :help vim.diagnostic.Opts
+			vim.diagnostic.config({
+				severity_sort = true,
+				float = { border = "rounded", source = true },
+				underline = { severity = vim.diagnostic.severity.ERROR },
+				signs = vim.g.have_nerd_font and {
+					text = {
+						[vim.diagnostic.severity.ERROR] = "󰅚 ",
+						[vim.diagnostic.severity.WARN] = "󰀪 ",
+						[vim.diagnostic.severity.INFO] = "󰋽 ",
+						[vim.diagnostic.severity.HINT] = "󰌶 ",
+					},
+				} or {},
+				virtual_text = {
+					source = true,
+					spacing = 2,
+					format = function(diagnostic)
+						local diagnostic_message = {
+							[vim.diagnostic.severity.ERROR] = diagnostic.message,
+							[vim.diagnostic.severity.WARN] = diagnostic.message,
+							[vim.diagnostic.severity.INFO] = diagnostic.message,
+							[vim.diagnostic.severity.HINT] = diagnostic.message,
+						}
+						return diagnostic_message[diagnostic.severity]
+					end,
+				},
+			})
 
 			-- Change diagnostic symbols in the sign column (gutter)
 			if vim.g.have_nerd_font then
@@ -877,6 +904,7 @@ require("lazy").setup({
 							analysis = {
 								diagnosticMode = "workspace",
 								typeCheckingMode = "basic",
+								useLibraryCodeForTypes = true,
 								inlayHints = {
 									callArgumentNames = true,
 									functionReturnTypes = true,
@@ -948,11 +976,15 @@ require("lazy").setup({
 			})
 		end,
 	},
-	-- {
-	-- 	"dgagn/diagflow.nvim",
-	-- 	event = "LspAttach",
-	-- 	opts = {},
-	-- },
+	{
+		"dgagn/diagflow.nvim",
+		event = "LspAttach",
+		opts = {
+			format = function(diagnostic)
+				return diagnostic.source .. ": " .. diagnostic.message
+			end,
+		},
+	},
 	{ -- Autoformat
 		"stevearc/conform.nvim",
 		event = { "BufWritePre" },
@@ -990,6 +1022,8 @@ require("lazy").setup({
 				-- Conform can also run multiple formatters sequentially
 				python = { "black" },
 				json = { "prettier" },
+				html = { "prettier" },
+				javascript = { "prettier" },
 				--
 				-- You can use 'stop_after_first' to run the first available formatter from the list
 				-- javascript = { "prettierd", "prettier", stop_after_first = true },
@@ -1049,12 +1083,12 @@ require("lazy").setup({
 					-- `friendly-snippets` contains a variety of premade snippets.
 					--    See the README about individual language/framework/plugin snippets:
 					--    https://github.com/rafamadriz/friendly-snippets
-					-- {
-					--   'rafamadriz/friendly-snippets',
-					--   config = function()
-					--     require('luasnip.loaders.from_vscode').lazy_load()
-					--   end,
-					-- },
+					{
+						"rafamadriz/friendly-snippets",
+						config = function()
+							require("luasnip.loaders.from_vscode").lazy_load()
+						end,
+					},
 				},
 			},
 			"saadparwaiz1/cmp_luasnip",
@@ -1063,9 +1097,11 @@ require("lazy").setup({
 			-- Adds other completion capabilities.
 			--  nvim-cmp does not ship with all sources by default. They are split
 			--  into multiple repos for maintenance purposes.
+			"hrsh7th/cmp-buffer",
 			"hrsh7th/cmp-nvim-lsp",
-			"zbirenbaum/copilot-cmp",
 			"hrsh7th/cmp-path",
+			"hrsh7th/cmp-nvim-lsp-signature-help",
+			"zbirenbaum/copilot-cmp",
 		},
 		config = function()
 			-- See `:help cmp`
@@ -1078,7 +1114,6 @@ require("lazy").setup({
 				},
 			})
 
-			vim.api.nvim_set_hl(0, "CmpItemKindCopilot", { fg = "#6CC644" })
 			luasnip.config.setup({})
 			require("luasnip.loaders.from_vscode").lazy_load()
 			cmp.setup({
@@ -1147,10 +1182,13 @@ require("lazy").setup({
 						-- set group index to 0 to skip loading LuaLS completions as lazydev recommends it
 						group_index = 0,
 					},
-					{ name = "copilot" },
 					{ name = "nvim_lsp" },
+					{ name = "treesitter" },
+					{ name = "buffer" },
 					{ name = "luasnip" },
 					{ name = "path" },
+					{ name = "nvim_lsp_signature_help" },
+					{ name = "copilot", group_index = 1 },
 				},
 			})
 		end,
@@ -1207,7 +1245,10 @@ require("lazy").setup({
 			})
 		end,
 	},
-
+	{
+		"stevearc/dressing.nvim",
+		opts = {},
+	},
 	{ -- You can easily change to a different colorscheme.
 		-- Change the name of the colorscheme plugin below, and then
 		-- change the command in the config to whatever the name of that colorscheme is.
@@ -1309,6 +1350,7 @@ require("lazy").setup({
 				"html",
 				"lua",
 				"luadoc",
+				"toml",
 				"markdown",
 				"markdown_inline",
 				"query",
@@ -1316,6 +1358,8 @@ require("lazy").setup({
 				"vimdoc",
 				"python",
 				"json",
+				"rst",
+				"ninja",
 				"yaml",
 			},
 			-- Autoinstall languages that are not installed
