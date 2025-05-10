@@ -148,7 +148,28 @@ return {
 		dap.listeners.after.event_initialized["dapui_config"] = dapui.open
 		dap.listeners.before.event_terminated["dapui_config"] = dapui.close
 		dap.listeners.before.event_exited["dapui_config"] = dapui.close
-		require("dap-python").setup()
+		local debugpy_python = require("mason-registry").get_package("debugpy"):get_install_path()
+			.. "/venv/bin/python3"
+		require("dap-python").setup(debugpy_python, {})
+		table.insert(dap.configurations.python, 1, {
+			name = "➤ Launch current file as module",
+			type = "python",
+			request = "launch",
+			module = function()
+				-- e.g. "src/foo/bar.py" → "src.foo.bar"
+				local rel = vim.fn.expand("%:.:r")
+				return rel:gsub("/", ".")
+			end,
+			cwd = vim.fn.getcwd(),
+			pythonPath = function()
+				local venv = os.getenv("VIRTUAL_ENV")
+				if venv and #venv > 0 then
+					return venv .. "/bin/python"
+				end
+				return "python"
+			end,
+			justMyCode = true,
+		})
 		-- -- Install golang specific config
 		-- require("dap-go").setup({
 		-- 	delve = {

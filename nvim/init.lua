@@ -312,7 +312,7 @@ require("lazy").setup({
 		},
 		build = "make tiktoken", -- Only on MacOS or Linux
 		opts = {
-			-- See Configuration section for options
+			model = "o4-mini",
 		},
 		keys = {
 			{ "<leader>zc", "<cmd>:CopilotChat<CR>", mode = "n", desc = "Open Copilot Chat" },
