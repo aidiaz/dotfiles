@@ -32,12 +32,19 @@ install_dependencies() {
   fi
 
   # OpenSSH Server
-  # Note: 'sshd' is the daemon for openssh-server. 'ssh' command is from openssh-client.
   if ! command_exists sshd; then
     echo "openssh-server (sshd) not found. Adding to apt installation list."
     pkgs_to_install_apt+=("openssh-server")
   else
     echo "openssh-server (sshd) appears to be installed."
+  fi
+
+  # Neovim (nvim)
+  if ! command_exists nvim; then
+    echo "Neovim (nvim) not found. Adding to apt installation list."
+    pkgs_to_install_apt+=("neovim")
+  else
+    echo "Neovim (nvim) is already installed."
   fi
 
   # Attempt to install packages using apt
@@ -47,7 +54,7 @@ install_dependencies() {
       sudo apt update
       sudo apt install -y "${pkgs_to_install_apt[@]}"
     else
-      echo "Required system packages (git, curl, openssh-server) appear to be already installed or not requested for apt installation."
+      echo "Required system packages (git, curl, openssh-server, neovim) appear to be already installed or not requested for apt installation."
     fi
   else
     if [ ${#pkgs_to_install_apt[@]} -gt 0 ]; then
@@ -59,7 +66,6 @@ install_dependencies() {
   if ! command_exists oh-my-posh; then
     echo "Installing Oh My Posh using curl..."
     if command_exists curl; then
-      # Determine architecture for Oh My Posh download
       local arch
       case $(uname -m) in
         "x86_64") arch="amd64" ;;
@@ -92,18 +98,16 @@ install_dependencies() {
   fi
 
   # --- fzf (fuzzy finder - via git clone and install script) ---
-  # fzf's primary installation method involves git cloning.
   if ! command_exists fzf; then
     echo "Installing fzf..."
     if command_exists git; then
       if [ ! -d "$HOME/.fzf" ]; then
         git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"
-        "$HOME/.fzf/install" --all # Use --all for non-interactive setup (key-bindings, completion)
+        "$HOME/.fzf/install" --all 
         echo "fzf installed."
         echo "IMPORTANT: fzf's install script likely updated your active shell config. Since you symlink .zshrc, ensure the necessary fzf lines are in $HOME/dotfiles/.zshrc."
       else
         echo "$HOME/.fzf directory already exists. Ensuring fzf is set up..."
-        # Re-running install can be useful if shell configs were missed or need refresh
         "$HOME/.fzf/install" --all
       fi
     else
@@ -123,50 +127,37 @@ install_dependencies
 
 # Step 2: Symlink Dotfiles
 
-# Define the source directory for your dotfiles
-DOTFILES_DIR="$HOME/dotfiles" # Assuming your dotfiles repo is cloned to $HOME/dotfiles
-
-# Define target directories
+DOTFILES_DIR="$HOME/dotfiles"
 config_folder="$HOME/.config"
 ssh_folder="$HOME/.ssh"
 
-# --- Configuration Directory Setup ---
 echo "Setting up $config_folder..."
-mkdir -p "$config_folder" # Ensure base .config directory exists
+mkdir -p "$config_folder"
 
-# Specific subdirectories that will contain symlinked files or are symlinks themselves
-# Ensure parent directories for these are created before symlinking
 config_targets_to_ensure_parents_for=(
     "$config_folder/tmux/tmux.conf"
     "$config_folder/ohmyposh/catppuccin.omp.json"
-    "$config_folder/nvim" # nvim itself is a directory symlink
+    "$config_folder/nvim" 
 )
-
 for target_path in "${config_targets_to_ensure_parents_for[@]}"; do
   mkdir -p "$(dirname "$target_path")"
 done
 
-
-# --- SSH Directory Setup ---
 echo "Setting up $ssh_folder..."
 if [ ! -d "$ssh_folder" ]; then
   mkdir -p "$ssh_folder"
-  chmod 700 "$ssh_folder" # SSH directory requires strict permissions
+  chmod 700 "$ssh_folder"
   echo "Created $ssh_folder with 700 permissions."
 else
   echo "$ssh_folder already exists. Verifying permissions..."
-  chmod 700 "$ssh_folder" # Ensure correct permissions
+  chmod 700 "$ssh_folder"
 fi
 
-# --- Symlinking ---
 echo "Creating symlinks..."
-
-# Define files and directories to symlink as an associative array
-# Format: "source_in_dotfiles_repo"="$HOME/target_location"
 declare -A symlinks
 symlinks=(
   ["$DOTFILES_DIR/.zshrc"]="$HOME/.zshrc"
-  ["$DOTFILES_DIR/nvim"]="$config_folder/nvim" # nvim config is a directory
+  ["$DOTFILES_DIR/nvim"]="$config_folder/nvim"
   ["$DOTFILES_DIR/.ssh/config"]="$ssh_folder/config"
   ["$DOTFILES_DIR/.gitconfig"]="$HOME/.gitconfig"
   ["$DOTFILES_DIR/tmux/tmux.conf"]="$config_folder/tmux/tmux.conf"
@@ -175,36 +166,28 @@ symlinks=(
 
 for source in "${(@k)symlinks}"; do
   target="${symlinks[$source]}"
-  target_dir=$(dirname "$target") # Parent directory of the target symlink
+  target_dir=$(dirname "$target") 
 
-  # Ensure the immediate parent directory for the symlink itself exists
-  # This was partially covered above, but this is more direct for each link.
   if [ ! -d "$target_dir" ]; then
       mkdir -p "$target_dir"
       echo "Created directory for symlink target: $target_dir"
   fi
 
-  # If target exists and is not a symlink, back it up
   if [ -e "$target" ] && [ ! -L "$target" ]; then
     backup_name="${target}.bak_$(date +%F-%T)"
     echo "Backing up existing file/directory: $target to $backup_name"
     mv "$target" "$backup_name"
   fi
 
-  # Remove existing symlink before creating a new one to avoid issues
   if [ -L "$target" ]; then
     echo "Removing existing symlink at $target"
     rm "$target"
   fi
   
-  # Create the symlink
-  # -n (--no-dereference) is important for directory symlinks if the target symlink itself exists
-  # -f (--force) forces the link (e.g. overwrites if target is a file, but we backed up above)
-  # -s for symbolic
-  if [ -d "$source" ]; then # Check if source is a directory
+  if [ -d "$source" ]; then 
     ln -sfn "$source" "$target"
     echo "Linked directory: $source -> $target"
-  else # Source is a file
+  else 
     ln -sf "$source" "$target"
     echo "Linked file: $source -> $target"
   fi
@@ -217,6 +200,5 @@ echo "1. Ensure your '$DOTFILES_DIR/.zshrc' contains initialization lines for:"
 echo "   - Oh My Posh: eval \"\$(oh-my-posh init zsh --config '$config_folder/ohmyposh/catppuccin.omp.json')\""
 echo "   - Zoxide:     eval \"\$(zoxide init zsh)\""
 echo "   - fzf:        The fzf install script might have added lines. Verify they are in your source .zshrc."
-echo "                 Typically, this involves sourcing a file like '[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh'."
 echo "2. Restart your shell or source your .zshrc for changes to take effect."
 echo "---------------------------------------------------------------------"
