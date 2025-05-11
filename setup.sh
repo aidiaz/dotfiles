@@ -47,14 +47,38 @@ install_dependencies() {
     echo "Neovim (nvim) is already installed."
   fi
 
+  # fd (fd-find)
+  # The command is 'fd', but the package is often 'fd-find' on Debian/Ubuntu.
+  if ! command_exists fd; then
+    echo "fd (fd-find) not found. Adding 'fd-find' to apt installation list."
+    pkgs_to_install_apt+=("fd-find")
+  else
+    echo "fd (fd-find) is already installed."
+  fi
+
   # Attempt to install packages using apt
   if command_exists apt; then
     if [ ${#pkgs_to_install_apt[@]} -gt 0 ]; then
       echo "Attempting to install system packages via apt: ${pkgs_to_install_apt[*]}"
       sudo apt update
       sudo apt install -y "${pkgs_to_install_apt[@]}"
+
+      # On some systems, after installing 'fd-find', 'fd' command might not be directly available.
+      # A common solution is to create a symlink if 'fd' isn't found but 'fdfind' is.
+      if command_exists fdfind && ! command_exists fd; then
+        echo "Command 'fdfind' found but 'fd' is not. Creating symlink /usr/bin/fd -> fdfind."
+        # Check if /usr/bin is writable or if we need sudo for the link
+        if [ -w /usr/bin ]; then
+            ln -s "$(command -v fdfind)" /usr/bin/fd
+        elif [ -w /usr/local/bin ]; then # Fallback to /usr/local/bin
+            echo "Attempting to create symlink in /usr/local/bin as /usr/bin is not writable without sudo for link."
+            sudo ln -s "$(command -v fdfind)" /usr/local/bin/fd
+        else
+            echo "Could not create symlink for fd automatically. You might need to do it manually: sudo ln -s \$(command -v fdfind) /usr/local/bin/fd"
+        fi
+      fi
     else
-      echo "Required system packages (git, curl, openssh-server, neovim) appear to be already installed or not requested for apt installation."
+      echo "Required system packages appear to be already installed or not requested for apt installation."
     fi
   else
     if [ ${#pkgs_to_install_apt[@]} -gt 0 ]; then
@@ -174,7 +198,7 @@ for source in "${(@k)symlinks}"; do
   fi
 
   if [ -e "$target" ] && [ ! -L "$target" ]; then
-    backup_name="${target}.bak_$(date +%F-%T)"
+    backup_name="${target}.bak_$(date +%F-%T)" # Appended timestamp
     echo "Backing up existing file/directory: $target to $backup_name"
     mv "$target" "$backup_name"
   fi
@@ -200,5 +224,8 @@ echo "1. Ensure your '$DOTFILES_DIR/.zshrc' contains initialization lines for:"
 echo "   - Oh My Posh: eval \"\$(oh-my-posh init zsh --config '$config_folder/ohmyposh/catppuccin.omp.json')\""
 echo "   - Zoxide:     eval \"\$(zoxide init zsh)\""
 echo "   - fzf:        The fzf install script might have added lines. Verify they are in your source .zshrc."
-echo "2. Restart your shell or source your .zshrc for changes to take effect."
+echo "2. If 'fd-find' was installed, a symlink from 'fd' to 'fdfind' might have been created."
+echo "   Verify 'fd' command works. If not, you might need to create the symlink manually:"
+echo "   'sudo ln -s \$(command -v fdfind) /usr/local/bin/fd' (or /usr/bin/fd)."
+echo "3. Restart your shell or source your .zshrc for changes to take effect."
 echo "---------------------------------------------------------------------"
