@@ -56,33 +56,11 @@ install_dependencies() {
   fi
 
   # C/C++ Compilation Tools
-  if ! dpkg -s build-essential >/dev/null 2>&1; then # dpkg -s is a more reliable check for metapackages
+  if ! dpkg -s build-essential >/dev/null 2>&1; then
     echo "build-essential not found. Adding to apt installation list."
     pkgs_to_install_apt+=("build-essential")
   else
     echo "build-essential is already installed."
-  fi
-
-  if ! command_exists gcc; then
-    echo "gcc not found. Ensuring build-essential covers it or adding explicitly."
-    # build-essential should pull this, but can be listed if strictness is needed
-    # pkgs_to_install_apt+=("gcc") # Usually covered by build-essential
-  else
-    echo "gcc is already installed."
-  fi
-
-  if ! command_exists g++; then
-    echo "g++ not found. Ensuring build-essential covers it or adding explicitly."
-    # pkgs_to_install_apt+=("g++") # Usually covered by build-essential
-  else
-    echo "g++ is already installed."
-  fi
-
-  if ! command_exists make; then
-    echo "make not found. Ensuring build-essential covers it or adding explicitly."
-    # pkgs_to_install_apt+=("make") # Usually covered by build-essential
-  else
-    echo "make is already installed."
   fi
 
   if ! command_exists gdb; then
@@ -99,26 +77,40 @@ install_dependencies() {
     echo "clang is already installed."
   fi
 
+  # Node.js and npm
+  if ! command_exists node; then
+    echo "Node.js (node) not found. Adding 'nodejs' to apt installation list."
+    pkgs_to_install_apt+=("nodejs")
+  else
+    echo "Node.js (node) is already installed."
+  fi
+
+  if ! command_exists npm; then
+    echo "npm not found. Adding 'npm' to apt installation list."
+    pkgs_to_install_apt+=("npm")
+  else
+    echo "npm is already installed."
+  fi
 
   # Attempt to install packages using apt
   if command_exists apt; then
-    # Remove duplicates just in case, though shell array appends won't duplicate strings
     local unique_pkgs_to_install_apt
     unique_pkgs_to_install_apt=($(echo "${pkgs_to_install_apt[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
 
     if [ ${#unique_pkgs_to_install_apt[@]} -gt 0 ]; then
       echo "Attempting to install system packages via apt: ${unique_pkgs_to_install_apt[*]}"
-      sudo add-apt-repository ppa:neovim-ppa/unstable
       sudo apt update
       sudo apt install -y "${unique_pkgs_to_install_apt[@]}"
 
       if command_exists fdfind && ! command_exists fd; then
-        echo "Command 'fdfind' found but 'fd' is not. Creating symlink /usr/bin/fd -> fdfind."
+        echo "Command 'fdfind' found but 'fd' is not. Creating symlink for fd."
         if [ -w /usr/bin ]; then
-            ln -s "$(command -v fdfind)" /usr/bin/fd
+            sudo ln -sf "$(command -v fdfind)" /usr/bin/fd # Use -sf for safety
+            echo "Symlink created: /usr/bin/fd -> $(command -v fdfind)"
         elif [ -w /usr/local/bin ]; then
-            echo "Attempting to create symlink in /usr/local/bin as /usr/bin is not writable without sudo for link."
-            sudo ln -s "$(command -v fdfind)" /usr/local/bin/fd
+            echo "Attempting to create symlink in /usr/local/bin."
+            sudo ln -sf "$(command -v fdfind)" /usr/local/bin/fd # Use -sf for safety
+            echo "Symlink created: /usr/local/bin/fd -> $(command -v fdfind)"
         else
             echo "Could not create symlink for fd automatically. You might need to do it manually: sudo ln -s \$(command -v fdfind) /usr/local/bin/fd"
         fi
@@ -127,7 +119,7 @@ install_dependencies() {
       echo "Required system packages appear to be already installed or not requested for apt installation."
     fi
   else
-    if [ ${#pkgs_to_install_apt[@]} -gt 0 ]; then # Check original list as unique might be empty if all existed
+    if [ ${#pkgs_to_install_apt[@]} -gt 0 ]; then
       echo "apt package manager not found, but some system packages were requested. Please install manually: ${pkgs_to_install_apt[*]}"
     fi
   fi
@@ -244,7 +236,7 @@ for source in "${(@k)symlinks}"; do
   fi
 
   if [ -e "$target" ] && [ ! -L "$target" ]; then
-    backup_name="${target}.bak_$(date +%F-%T)" # Appended timestamp
+    backup_name="${target}.bak_$(date +%F-%T)"
     echo "Backing up existing file/directory: $target to $backup_name"
     mv "$target" "$backup_name"
   fi
@@ -272,6 +264,7 @@ echo "   - Zoxide:     eval \"\$(zoxide init zsh)\""
 echo "   - fzf:        The fzf install script might have added lines. Verify they are in your source .zshrc."
 echo "2. If 'fd-find' was installed, a symlink from 'fd' to 'fdfind' might have been created."
 echo "   Verify 'fd' command works. If not, you might need to create the symlink manually."
-echo "3. C/C++ build tools (build-essential, gcc, g++, make, gdb, clang) should now be installed if they weren't already."
-echo "4. Restart your shell or source your .zshrc for changes to take effect."
+echo "3. C/C++ build tools (build-essential, gcc, g++, make, gdb, clang) should now be installed."
+echo "4. Node.js and npm should now be installed if they weren't already."
+echo "5. Restart your shell or source your .zshrc for changes to take effect."
 echo "---------------------------------------------------------------------"
