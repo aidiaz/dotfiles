@@ -48,7 +48,6 @@ install_dependencies() {
   fi
 
   # fd (fd-find)
-  # The command is 'fd', but the package is often 'fd-find' on Debian/Ubuntu.
   if ! command_exists fd; then
     echo "fd (fd-find) not found. Adding 'fd-find' to apt installation list."
     pkgs_to_install_apt+=("fd-find")
@@ -56,21 +55,67 @@ install_dependencies() {
     echo "fd (fd-find) is already installed."
   fi
 
+  # C/C++ Compilation Tools
+  if ! dpkg -s build-essential >/dev/null 2>&1; then # dpkg -s is a more reliable check for metapackages
+    echo "build-essential not found. Adding to apt installation list."
+    pkgs_to_install_apt+=("build-essential")
+  else
+    echo "build-essential is already installed."
+  fi
+
+  if ! command_exists gcc; then
+    echo "gcc not found. Ensuring build-essential covers it or adding explicitly."
+    # build-essential should pull this, but can be listed if strictness is needed
+    # pkgs_to_install_apt+=("gcc") # Usually covered by build-essential
+  else
+    echo "gcc is already installed."
+  fi
+
+  if ! command_exists g++; then
+    echo "g++ not found. Ensuring build-essential covers it or adding explicitly."
+    # pkgs_to_install_apt+=("g++") # Usually covered by build-essential
+  else
+    echo "g++ is already installed."
+  fi
+
+  if ! command_exists make; then
+    echo "make not found. Ensuring build-essential covers it or adding explicitly."
+    # pkgs_to_install_apt+=("make") # Usually covered by build-essential
+  else
+    echo "make is already installed."
+  fi
+
+  if ! command_exists gdb; then
+    echo "gdb (GNU Debugger) not found. Adding to apt installation list."
+    pkgs_to_install_apt+=("gdb")
+  else
+    echo "gdb is already installed."
+  fi
+
+  if ! command_exists clang; then
+    echo "clang not found. Adding to apt installation list."
+    pkgs_to_install_apt+=("clang")
+  else
+    echo "clang is already installed."
+  fi
+
+
   # Attempt to install packages using apt
   if command_exists apt; then
-    if [ ${#pkgs_to_install_apt[@]} -gt 0 ]; then
-      echo "Attempting to install system packages via apt: ${pkgs_to_install_apt[*]}"
-      sudo apt update
-      sudo apt install -y "${pkgs_to_install_apt[@]}"
+    # Remove duplicates just in case, though shell array appends won't duplicate strings
+    local unique_pkgs_to_install_apt
+    unique_pkgs_to_install_apt=($(echo "${pkgs_to_install_apt[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
 
-      # On some systems, after installing 'fd-find', 'fd' command might not be directly available.
-      # A common solution is to create a symlink if 'fd' isn't found but 'fdfind' is.
+    if [ ${#unique_pkgs_to_install_apt[@]} -gt 0 ]; then
+      echo "Attempting to install system packages via apt: ${unique_pkgs_to_install_apt[*]}"
+      sudo apt update
+      sudo apt install -y "${unique_pkgs_to_install_apt[@]}"
+
       if command_exists fdfind && ! command_exists fd; then
         echo "Command 'fdfind' found but 'fd' is not. Creating symlink /usr/bin/fd -> fdfind."
-        # Check if /usr/bin is writable or if we need sudo for the link
         if [ -w /usr/bin ]; then
             ln -s "$(command -v fdfind)" /usr/bin/fd
-        elif [ -w /usr/local/bin ]; then # Fallback to /usr/local/bin
+        elif [ -w /usr/local/bin ]; then
             echo "Attempting to create symlink in /usr/local/bin as /usr/bin is not writable without sudo for link."
             sudo ln -s "$(command -v fdfind)" /usr/local/bin/fd
         else
@@ -81,7 +126,7 @@ install_dependencies() {
       echo "Required system packages appear to be already installed or not requested for apt installation."
     fi
   else
-    if [ ${#pkgs_to_install_apt[@]} -gt 0 ]; then
+    if [ ${#pkgs_to_install_apt[@]} -gt 0 ]; then # Check original list as unique might be empty if all existed
       echo "apt package manager not found, but some system packages were requested. Please install manually: ${pkgs_to_install_apt[*]}"
     fi
   fi
@@ -127,7 +172,7 @@ install_dependencies() {
     if command_exists git; then
       if [ ! -d "$HOME/.fzf" ]; then
         git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"
-        "$HOME/.fzf/install" --all 
+        "$HOME/.fzf/install" --all
         echo "fzf installed."
         echo "IMPORTANT: fzf's install script likely updated your active shell config. Since you symlink .zshrc, ensure the necessary fzf lines are in $HOME/dotfiles/.zshrc."
       else
@@ -161,7 +206,7 @@ mkdir -p "$config_folder"
 config_targets_to_ensure_parents_for=(
     "$config_folder/tmux/tmux.conf"
     "$config_folder/ohmyposh/catppuccin.omp.json"
-    "$config_folder/nvim" 
+    "$config_folder/nvim"
 )
 for target_path in "${config_targets_to_ensure_parents_for[@]}"; do
   mkdir -p "$(dirname "$target_path")"
@@ -190,7 +235,7 @@ symlinks=(
 
 for source in "${(@k)symlinks}"; do
   target="${symlinks[$source]}"
-  target_dir=$(dirname "$target") 
+  target_dir=$(dirname "$target")
 
   if [ ! -d "$target_dir" ]; then
       mkdir -p "$target_dir"
@@ -207,11 +252,11 @@ for source in "${(@k)symlinks}"; do
     echo "Removing existing symlink at $target"
     rm "$target"
   fi
-  
-  if [ -d "$source" ]; then 
+
+  if [ -d "$source" ]; then
     ln -sfn "$source" "$target"
     echo "Linked directory: $source -> $target"
-  else 
+  else
     ln -sf "$source" "$target"
     echo "Linked file: $source -> $target"
   fi
@@ -225,7 +270,7 @@ echo "   - Oh My Posh: eval \"\$(oh-my-posh init zsh --config '$config_folder/oh
 echo "   - Zoxide:     eval \"\$(zoxide init zsh)\""
 echo "   - fzf:        The fzf install script might have added lines. Verify they are in your source .zshrc."
 echo "2. If 'fd-find' was installed, a symlink from 'fd' to 'fdfind' might have been created."
-echo "   Verify 'fd' command works. If not, you might need to create the symlink manually:"
-echo "   'sudo ln -s \$(command -v fdfind) /usr/local/bin/fd' (or /usr/bin/fd)."
-echo "3. Restart your shell or source your .zshrc for changes to take effect."
+echo "   Verify 'fd' command works. If not, you might need to create the symlink manually."
+echo "3. C/C++ build tools (build-essential, gcc, g++, make, gdb, clang) should now be installed if they weren't already."
+echo "4. Restart your shell or source your .zshrc for changes to take effect."
 echo "---------------------------------------------------------------------"
