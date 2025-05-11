@@ -12,249 +12,190 @@ command_exists() {
 # --- Package Installation Function ---
 install_dependencies() {
   echo "Checking and installing required dependencies..."
+  local os_type
+  os_type=$(uname -s)
 
-  local pkgs_to_install_apt=()
-
-  # Git
-  if ! command_exists git; then
-    echo "git not found. Adding to apt installation list."
-    pkgs_to_install_apt+=("git")
-  else
-    echo "git is already installed."
-  fi
-
-  # Curl - needed for NodeSource and other installers
-  if ! command_exists curl; then
-    echo "curl not found. Adding to apt installation list."
-    pkgs_to_install_apt+=("curl")
-  else
-    echo "curl is already installed."
-  fi
-
-  # OpenSSH Server
-  if ! command_exists sshd; then
-    echo "openssh-server (sshd) not found. Adding to apt installation list."
-    pkgs_to_install_apt+=("openssh-server")
-  else
-    echo "openssh-server (sshd) appears to be installed."
-  fi
-
-  # Neovim (nvim)
-  if ! command_exists nvim; then
-    echo "Neovim (nvim) not found. Adding to apt installation list."
-    pkgs_to_install_apt+=("neovim")
-  else
-    echo "Neovim (nvim) is already installed."
-  fi
-
-  # fd (fd-find)
-  if ! command_exists fd; then
-    echo "fd (fd-find) not found. Adding 'fd-find' to apt installation list."
-    pkgs_to_install_apt+=("fd-find")
-  else
-    echo "fd (fd-find) is already installed."
-  fi
-
-  # tmux
-  if ! command_exists tmux; then
-    echo "tmux not found. Adding 'tmux' to apt installation list."
-    pkgs_to_install_apt+=("tmux")
-  else
-    echo "tmux is already installed"
-  fi
-
-  # python-venv
-  if ! command_exists python3.12-venv; then
-    echo "python3.12-venv not found. Adding 'python3.12-venv' to apt installation list."
-    pkgs_to_install_apt+=("python3.12-venv")
-  else
-    echo "python3.12-venv is already installed"
-  fi
-
-  # C/C++ Compilation Tools
-  if ! dpkg -s build-essential >/dev/null 2>&1; then
-    echo "build-essential not found. Adding to apt installation list."
-    pkgs_to_install_apt+=("build-essential")
-  else
-    echo "build-essential is already installed."
-  fi
-
-  if ! command_exists gdb; then
-    echo "gdb (GNU Debugger) not found. Adding to apt installation list."
-    pkgs_to_install_apt+=("gdb")
-  else
-    echo "gdb is already installed."
-  fi
-
-  if ! command_exists clang; then
-    echo "clang not found. Adding to apt installation list."
-    pkgs_to_install_apt+=("clang")
-  else
-    echo "clang is already installed."
-  fi
-
-  # Node.js 20.x specific installation via NodeSource
-  local install_node_from_nodesource=false
-  local node_already_v20=false
-
-  if command_exists node; then
-    current_node_version=$(node -v)
-    if [[ "$current_node_version" == v20.* ]]; then
-      echo "Node.js version 20.x ($current_node_version) is already installed."
-      node_already_v20=true
-      if ! command_exists npm; then
-        echo "Node.js 20.x is installed, but npm is missing. Adding 'npm' to apt installation list (should be bundled with NodeSource's nodejs)."
-        # This is a fallback; NodeSource's nodejs package usually includes npm.
-        pkgs_to_install_apt+=("npm")
-      else
-        echo "npm is also installed ($(npm -v))."
-      fi
+  # --- macOS Specific Installation (using Homebrew) ---
+  if [[ "$os_type" == "Darwin" ]]; then
+    echo "Detected macOS. Using Homebrew for package management."
+    if ! command_exists brew; then
+      echo "ERROR: Homebrew (brew) not found. Please install Homebrew first: https://brew.sh/"
+      echo "Skipping package installations that depend on Homebrew."
+      # Optionally exit here: exit 1
     else
-      echo "Node.js is installed ($current_node_version) but is not version 20.x. Will upgrade/reinstall using NodeSource."
-      install_node_from_nodesource=true
-    fi
-  else
-    echo "Node.js not found. Will install version 20.x using NodeSource."
-    install_node_from_nodesource=true
-  fi
+      echo "Homebrew found. Updating Homebrew..."
+      brew update
 
-  if [[ "$install_node_from_nodesource" == "true" ]]; then
-    # Ensure curl is available before running NodeSource script.
-    # If 'curl' was added to pkgs_to_install_apt earlier, it won't be installed until the main apt command.
-    # So, we need to install curl now if it's not present.
-    if ! command_exists curl; then
-      echo "curl is required to setup NodeSource repository. Installing curl first..."
-      sudo apt update # Update before this specific install
-      sudo apt install -y curl
-      if ! command_exists curl; then
-        echo "ERROR: Failed to install curl. Cannot setup NodeSource repository for Node.js 20."
-        exit 1 # Exit if curl installation fails
+      local pkgs_to_install_brew=()
+
+      # Core System Tools
+      if ! command_exists git; then pkgs_to_install_brew+=("git"); else echo "git is already installed."; fi
+      if ! command_exists curl; then pkgs_to_install_brew+=("curl"); else echo "curl is already installed."; fi
+      if ! brew list openssh &>/dev/null && ! command_exists ssh; then pkgs_to_install_brew+=("openssh"); else echo "OpenSSH client appears to be installed."; fi
+      
+      # Development Tools
+      if ! command_exists nvim; then pkgs_to_install_brew+=("neovim"); else echo "Neovim (nvim) is already installed."; fi
+      if ! command_exists fd; then pkgs_to_install_brew+=("fd"); else echo "fd is already installed."; fi
+      if ! command_exists tmux; then pkgs_to_install_brew+=("tmux"); else echo "tmux is already installed."; fi
+      if ! command_exists python3.12 && ! (command_exists python3 && python3 -V 2>&1 | grep -q "3\.12"); then
+          if brew info python@3.12 &>/dev/null; then pkgs_to_install_brew+=("python@3.12"); 
+          elif brew info python@3.11 &>/dev/null; then pkgs_to_install_brew+=("python@3.11");
+          else pkgs_to_install_brew+=("python"); fi
+      else echo "Python 3.12 (or compatible) seems installed."; fi
+      if ! command_exists gdb; then pkgs_to_install_brew+=("gdb"); else echo "gdb is already installed."; fi
+      if ! command_exists clang; then echo "Clang not found. Part of Xcode Command Line Tools. Run 'xcode-select --install'."; else echo "clang is already installed."; fi
+
+      # Node.js 20.x
+      local install_node_brew=false
+      if command_exists node; then
+        current_node_version=$(node -v)
+        if [[ "$current_node_version" == v20.* ]]; then echo "Node.js version 20.x ($current_node_version) is already installed.";
+        else echo "Node.js is installed ($current_node_version) but not v20.x. Will attempt upgrade via Homebrew."; install_node_brew=true; fi
+      else echo "Node.js not found. Will install version 20.x using Homebrew."; install_node_brew=true; fi
+      if [[ "$install_node_brew" == "true" ]]; then
+        if brew info node@20 &>/dev/null; then pkgs_to_install_brew+=("node@20"); else pkgs_to_install_brew+=("node"); fi
       fi
-    fi
-    echo "Setting up NodeSource repository for Node.js 20.x..."
-    # The NodeSource script handles adding the GPG key and source list.
-    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-    # NodeSource script usually runs 'apt-get update' or advises to.
-    # We will run 'sudo apt update' before the main install loop anyway.
-    pkgs_to_install_apt+=("nodejs") # This will now pull Node.js 20.x and npm from NodeSource
-  fi
 
-  # Attempt to install/update all collected packages using apt
-  if command_exists apt; then
-    # Remove duplicates from the list
-    local unique_pkgs_to_install_apt
-    unique_pkgs_to_install_apt=($(echo "${pkgs_to_install_apt[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+      # Shell Utilities (replacing curl methods)
+      if ! command_exists oh-my-posh; then pkgs_to_install_brew+=("oh-my-posh"); else echo "Oh My Posh is already installed."; fi
+      if ! command_exists zoxide; then pkgs_to_install_brew+=("zoxide"); else echo "Zoxide is already installed."; fi
+      if ! command_exists fzf; then pkgs_to_install_brew+=("fzf"); else echo "fzf is already installed."; fi
 
-    if [ ${#unique_pkgs_to_install_apt[@]} -gt 0 ]; then
-      echo "Attempting to install/update system packages via apt: ${unique_pkgs_to_install_apt[*]}"
-      sudo apt update # Crucial after adding new sources like NodeSource
-      sudo apt install -y "${unique_pkgs_to_install_apt[@]}"
-
-      # Create symlink for fd if fd-find was installed and fd command isn't available
-      if command_exists fdfind && ! command_exists fd; then
-        echo "Command 'fdfind' found but 'fd' is not. Creating symlink for fd."
-        # Prefer /usr/local/bin for user-installed links if possible, or /usr/bin
-        local fd_link_path="/usr/local/bin/fd"
-        if [ ! -w /usr/local/bin ] && [ -w /usr/bin ]; then # If /usr/local/bin not writable, try /usr/bin
-            fd_link_path="/usr/bin/fd"
-        fi
-        echo "Attempting to create symlink at $fd_link_path."
-        sudo ln -sf "$(command -v fdfind)" "$fd_link_path"
-        if command_exists fd; then
-            echo "Symlink created: $fd_link_path -> $(command -v fdfind)"
+      # Install collected Homebrew packages
+      if [ ${#pkgs_to_install_brew[@]} -gt 0 ]; then
+        echo "Attempting to install/update packages via Homebrew: ${pkgs_to_install_brew[*]}"
+        local unique_pkgs_to_install_brew
+        unique_pkgs_to_install_brew=($(echo "${pkgs_to_install_brew[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+        if brew install "${unique_pkgs_to_install_brew[@]}"; then
+            echo "Homebrew packages installed successfully."
+            if printf '%s\n' "${unique_pkgs_to_install_brew[@]}" | grep -q -w "fzf"; then
+                 echo "Running fzf post-install steps (key-bindings, completion)..."
+                 # Attempt to run non-interactive install for fzf's shell integration if brew didn't do it
+                 # Checgrek if the brew formula for fzf handles this automatically. Often it does.
+                 # If not, this might be needed: $(brew --prefix)/opt/fzf/install --all --no-update-rc
+                 echo "NOTE: For fzf shell integration, you might need to add 'eval \"\$(fzf --zsh)\"' or similar to your .zshrc if brew didn't set it up."
+            fi
         else
-            echo "Failed to create symlink for fd or it's not in PATH immediately. Please check manually."
+            echo "Error installing some Homebrew packages. Please check the output above."
         fi
-      fi
-    else
-      echo "All required system packages appear to be already installed or up-to-date."
-    fi
-  else
-    if [ ${#pkgs_to_install_apt[@]} -gt 0 ]; then # Check original list
-      echo "apt package manager not found, but some system packages were requested. Please install manually: ${pkgs_to_install_apt[*]}"
-    fi
-  fi
-
-  # --- Oh My Posh (via curl) ---
-  if ! command_exists oh-my-posh; then
-    echo "Installing Oh My Posh using curl..."
-    if command_exists curl; then # curl should be installed by now if it was needed
-      local arch
-      case $(uname -m) in
-        "x86_64") arch="amd64" ;;
-        "arm64" | "aarch64") arch="arm64" ;;
-        *) echo "Unsupported architecture for Oh My Posh automatic install: $(uname -m)"; exit 1 ;;
-      esac
-      sudo curl -L "https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-${arch}" -o /usr/local/bin/oh-my-posh
-      sudo chmod +x /usr/local/bin/oh-my-posh
-      echo "Oh My Posh installed to /usr/local/bin/oh-my-posh"
-      echo "IMPORTANT: Add 'eval \"\$(oh-my-posh init zsh)\"' to your $HOME/dotfiles/.zshrc"
-    else
-      echo "curl is required to install Oh My Posh automatically but was not found/installed. Please install curl first."
-    fi
-  else
-    echo "Oh My Posh is already installed."
-  fi
-
-  # --- Zoxide (via curl) ---
-  if ! command_exists zoxide; then
-    echo "Installing Zoxide using curl..."
-    if command_exists curl; then
-      curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
-      echo "Zoxide installed."
-      echo "IMPORTANT: The Zoxide installer might have updated your shell config. Otherwise, add 'eval \"\$(zoxide init zsh)\"' to your $HOME/dotfiles/.zshrc."
-    else
-      echo "curl is required to install Zoxide automatically but was not found/installed. Please install curl first."
-    fi
-  else
-    echo "Zoxide is already installed."
-  fi
-
-  # --- fzf (fuzzy finder - via git clone and install script) ---
-  if ! command_exists fzf; then
-    echo "Installing fzf..."
-    if command_exists git; then # git should be installed by now if it was needed
-      if [ ! -d "$HOME/.fzf" ]; then
-        mkdir "$HOME/.fzf"
-        git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"
-        # "$HOME/.fzf/install" --all
-        echo "fzf installed."
-        echo "IMPORTANT: fzf's install script likely updated your active shell config. Since you symlink .zshrc, ensure the necessary fzf lines are in $HOME/dotfiles/.zshrc."
       else
-        echo "$HOME/.fzf directory already exists. Ensuring fzf is set up..."
-        # "$HOME/.fzf/install" --all
+        echo "All required Homebrew packages appear to be already installed or up-to-date."
       fi
-    else
-      echo "git is required to install fzf using the standard method but was not found/installed. Please install git first."
-    fi
-  else
-    echo "fzf is already installed."
-  fi
 
-  # --- fzf (fuzzy finder - via git clone and install script) ---
-  if command_exists tmux; then
-    echo "Installing tpm..."
-    if command_exists git; then # git should be installed by now if it was needed
-      if [ ! -d "$HOME/dotfiles/tmux/plugins/" ]; then
-          git clone https://github.com/tmux-plugins/tpm "$HOME/dotfiles/tmux/plugins/tpm/"
-          # tmux
-          # tmux source "$HOME/dotfiles/tmux/tmux.conf"
-        echo "tpm cloned!"
-        echo "IMPORTANT: To install tpm and the plugins in the config do <prefix> + I"
+      # build-essential equivalent: Xcode Command Line Tools
+      if ! command_exists clang || ! command_exists make || ! command_exists git; then
+          echo "INFO: Xcode Command Line Tools might be missing or incomplete. Run 'xcode-select --install'."
       else
-        echo "$HOME/dotfiles/tmux/plugins/ directory already exists. Ensuring tmux-plugins is set up..."
-        # tmux
-        # tmux source "$HOME/dotfiles/tmux/tmux.conf"
+          echo "Xcode Command Line Tools seem to be present."
       fi
+    fi # End of if command_exists brew
+
+  # --- Linux Specific Installation (using apt) ---
+  elif [[ "$os_type" == "Linux" ]]; then
+    echo "Detected Linux. Using apt for package management."
+    if ! command_exists apt; then
+        echo "ERROR: apt package manager not found on Linux system. Cannot install dependencies."
     else
-      echo "git is required to install tmux-plugins using the standard method but was not found/installed. Please install git first."
-    fi
+        local pkgs_to_install_apt=()
+
+        # Core & Dev Tools
+        if ! command_exists git; then pkgs_to_install_apt+=("git"); fi
+        if ! command_exists curl; then pkgs_to_install_apt+=("curl"); fi
+        if ! command_exists sshd; then pkgs_to_install_apt+=("openssh-server"); fi
+        if ! command_exists nvim; then pkgs_to_install_apt+=("neovim"); fi
+        if ! command_exists fd; then pkgs_to_install_apt+=("fd-find"); fi
+        if ! command_exists tmux; then pkgs_to_install_apt+=("tmux"); fi
+        if ! command_exists python3.12-venv; then pkgs_to_install_apt+=("python3.12-venv"); fi
+        if ! dpkg -s build-essential >/dev/null 2>&1; then pkgs_to_install_apt+=("build-essential"); fi
+        if ! command_exists gdb; then pkgs_to_install_apt+=("gdb"); fi
+        if ! command_exists clang; then pkgs_to_install_apt+=("clang"); fi
+
+        # Node.js 20.x via NodeSource
+        local install_node_from_nodesource=false
+        if command_exists node; then
+            current_node_version=$(node -v)
+            if [[ "$current_node_version" == v20.* ]]; then
+                if ! command_exists npm; then pkgs_to_install_apt+=("npm"); fi
+            else install_node_from_nodesource=true; fi
+        else install_node_from_nodesource=true; fi
+
+        if [[ "$install_node_from_nodesource" == "true" ]]; then
+            if ! command_exists curl; then
+                if ! printf '%s\n' "${pkgs_to_install_apt[@]}" | grep -q -w "curl"; then pkgs_to_install_apt+=("curl"); fi
+                # Temporarily install curl if needed now
+                if ! command_exists curl && [ ${#pkgs_to_install_apt[@]} -gt 0 ]; then
+                    sudo apt update && sudo apt install -y curl
+                fi
+            fi
+            if command_exists curl; then
+                echo "Setting up NodeSource repository for Node.js 20.x..."
+                curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+                pkgs_to_install_apt+=("nodejs")
+            else echo "Curl still not available. Skipping Node.js setup via NodeSource."; fi
+        fi
+
+        # Install collected apt packages
+        if [ ${#pkgs_to_install_apt[@]} -gt 0 ]; then
+            local unique_pkgs_to_install_apt
+            unique_pkgs_to_install_apt=($(echo "${pkgs_to_install_apt[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+            if [ ${#unique_pkgs_to_install_apt[@]} -gt 0 ]; then
+                echo "Attempting to install/update system packages via apt: ${unique_pkgs_to_install_apt[*]}"
+                sudo apt update && sudo apt install -y "${unique_pkgs_to_install_apt[@]}"
+                if command_exists fdfind && ! command_exists fd; then
+                    local fd_link_path="/usr/local/bin/fd"; if [ ! -w /usr/local/bin ] && [ -w /usr/bin ]; then fd_link_path="/usr/bin/fd"; fi
+                    sudo ln -sf "$(command -v fdfind)" "$fd_link_path" && echo "Symlinked fdfind to fd."
+                fi
+            fi
+        else echo "All required system packages (apt) appear to be installed or up-to-date."; fi
+        
+        # Shell Utilities (using curl/git for Linux)
+        # Oh My Posh (curl)
+        if ! command_exists oh-my-posh; then
+            if command_exists curl; then
+                local arch; case $(uname -m) in "x86_64") arch="amd64" ;; "arm64" | "aarch64") arch="arm64" ;; *) arch="" ;; esac
+                if [[ -n "$arch" ]]; then
+                    echo "Installing Oh My Posh (Linux)..."
+                    sudo curl -L "https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-${arch}" -o /usr/local/bin/oh-my-posh
+                    sudo chmod +x /usr/local/bin/oh-my-posh
+                fi
+            else echo "curl needed for Oh My Posh on Linux."; fi
+        else echo "Oh My Posh already installed."; fi
+
+        # Zoxide (curl script)
+        if ! command_exists zoxide; then
+            if command_exists curl; then
+                echo "Installing Zoxide (Linux)..."
+                curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+            else echo "curl needed for Zoxide on Linux."; fi
+        else echo "Zoxide already installed."; fi
+
+        # fzf (git clone + install script)
+        if ! command_exists fzf; then
+            if command_exists git; then
+                echo "Installing fzf (Linux)..."
+                if [ ! -d "$HOME/.fzf" ]; then git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"; fi
+                "$HOME/.fzf/install" --all
+            else echo "git needed for fzf on Linux."; fi
+        else echo "fzf already installed."; fi
+    fi # End of if command_exists apt
   else
-    echo "tmux is already installed."
-  fi
+    echo "Unsupported operating system: $os_type. Skipping OS-specific package installations."
+  fi # End of OS type check
+
+  # --- Tmux Plugin Manager (TPM) --- (Common, assumes git/tmux are present)
+  echo "Checking Tmux Plugin Manager (TPM)..."
+  local tpm_install_dir="$HOME/dotfiles/tmux/plugins/tpm"
+  if command_exists tmux && command_exists git; then
+    if [ ! -d "$tpm_install_dir" ]; then
+      echo "Installing TPM to $tpm_install_dir..."
+      mkdir -p "$(dirname "$tpm_install_dir")"
+      if git clone https://github.com/tmux-plugins/tpm "$tpm_install_dir"; then echo "TPM installed successfully.";
+      else echo "Failed to clone TPM repository."; fi
+    else echo "TPM already found at $tpm_install_dir."; fi
+  else echo "tmux and git are required for TPM. One or both not found. Skipping TPM."; fi
+
   echo "Dependency check and tool installation phase complete."
 }
-
 # --- Main Script Execution ---
 
 # Step 1: Install Dependencies and Tools
