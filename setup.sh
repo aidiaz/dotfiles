@@ -215,13 +215,14 @@ install_dependencies() {
     echo "Installing fzf..."
     if command_exists git; then # git should be installed by now if it was needed
       if [ ! -d "$HOME/.fzf" ]; then
+        mkdir "$HOME/.fzf"
         git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"
-        "$HOME/.fzf/install" --all
+        # "$HOME/.fzf/install" --all
         echo "fzf installed."
         echo "IMPORTANT: fzf's install script likely updated your active shell config. Since you symlink .zshrc, ensure the necessary fzf lines are in $HOME/dotfiles/.zshrc."
       else
         echo "$HOME/.fzf directory already exists. Ensuring fzf is set up..."
-        "$HOME/.fzf/install" --all
+        # "$HOME/.fzf/install" --all
       fi
     else
       echo "git is required to install fzf using the standard method but was not found/installed. Please install git first."
@@ -230,6 +231,27 @@ install_dependencies() {
     echo "fzf is already installed."
   fi
 
+  # --- fzf (fuzzy finder - via git clone and install script) ---
+  if command_exists tmux; then
+    echo "Installing tpm..."
+    if command_exists git; then # git should be installed by now if it was needed
+      if [ ! -d "$HOME/dotfiles/tmux/plugins/" ]; then
+          git clone https://github.com/tmux-plugins/tpm "$HOME/dotfiles/tmux/plugins/tpm/"
+          # tmux
+          # tmux source "$HOME/dotfiles/tmux/tmux.conf"
+        echo "tpm cloned!"
+        echo "IMPORTANT: To install tpm and the plugins in the config do <prefix> + I"
+      else
+        echo "$HOME/dotfiles/tmux/plugins/ directory already exists. Ensuring tmux-plugins is set up..."
+        # tmux
+        # tmux source "$HOME/dotfiles/tmux/tmux.conf"
+      fi
+    else
+      echo "git is required to install tmux-plugins using the standard method but was not found/installed. Please install git first."
+    fi
+  else
+    echo "tmux is already installed."
+  fi
   echo "Dependency check and tool installation phase complete."
 }
 
@@ -267,11 +289,30 @@ else
 fi
 
 echo "Creating symlinks..."
+
+local SSHCONFIG=""
+if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
+    echo "Found linux system"
+    SSHCONFIG="$DOTFILES_DIR/.ssh/linux-config"
+else
+    echo "Found osx system"
+    SSHCONFIG="$DOTFILES_DIR/.ssh/osx-config"
+fi
+
+local ZSHRC=""
+if [ "$TERM_PROGRAM" != "Apple_Terminal" ]; then
+    echo "Found linux system"
+    ZSHRC="$DOTFILES_DIR/.zshrc-linux"
+else
+    echo "Found osx system"
+    ZSHRC="$DOTFILES_DIR/.zshrc-osx"
+fi
+
 declare -A symlinks
 symlinks=(
-  ["$DOTFILES_DIR/.zshrc"]="$HOME/.zshrc"
+  ["$ZSHRC"]="$HOME/.zshrc"
   ["$DOTFILES_DIR/nvim"]="$config_folder/nvim"
-  ["$DOTFILES_DIR/.ssh/config"]="$ssh_folder/config"
+  ["$SSHCONFIG"]="$ssh_folder/config"
   ["$DOTFILES_DIR/.gitconfig"]="$HOME/.gitconfig"
   ["$DOTFILES_DIR/tmux/tmux.conf"]="$config_folder/tmux/tmux.conf"
   ["$DOTFILES_DIR/ohmyposh/catppuccin.omp.json"]="$config_folder/ohmyposh/catppuccin.omp.json"
@@ -318,4 +359,6 @@ echo "   Verify 'fd' command works. If not, you might need to create the symlink
 echo "3. C/C++ build tools (build-essential, gdb, clang) should now be installed."
 echo "4. Node.js 20.x and npm should now be installed from NodeSource if they weren't already."
 echo "5. Restart your shell or source your .zshrc for changes to take effect."
+echo "6. For tmux setup, run tmux server, inside run 'tmux source .config/tmux/tmux.conf'"
+echo "7. Do <prefix> + I to install tpm and other tmux plugins"
 echo "---------------------------------------------------------------------"
