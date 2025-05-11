@@ -657,20 +657,7 @@ require("lazy").setup({
 			{
 				"williamboman/mason.nvim",
 				opts = {
-					ensure_installed = {
-						"basedpyright",
-						"json-lsp",
-						"black",
-						"debugpy",
-						"markdownlint",
-						"flake8",
-						"json-lint",
-						"yaml-language-server",
-						"yaml-lint",
-						"prettier",
-						"docker-compose-language-service",
-						"dockerfile-language-server",
-					},
+					ensure_installed = {},
 				},
 				config = true,
 			}, -- NOTE: Must be loaded before dependants
@@ -955,6 +942,18 @@ require("lazy").setup({
 			local ensure_installed = vim.tbl_keys(servers or {})
 			vim.list_extend(ensure_installed, {
 				"stylua", -- Used to format Lua code
+				"basedpyright",
+				"json-lsp",
+				"black",
+				"debugpy",
+				"markdownlint",
+				"flake8",
+				"jsonlint",
+				"yaml-language-server",
+				"yamllint",
+				"prettier",
+				"docker-compose-language-service",
+				"dockerfile-language-server",
 			})
 			require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 
