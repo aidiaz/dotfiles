@@ -108,6 +108,7 @@ install_dependencies() {
 
     if [ ${#unique_pkgs_to_install_apt[@]} -gt 0 ]; then
       echo "Attempting to install system packages via apt: ${unique_pkgs_to_install_apt[*]}"
+      sudo add-apt-repository ppa:neovim-ppa/unstable
       sudo apt update
       sudo apt install -y "${unique_pkgs_to_install_apt[@]}"
 
