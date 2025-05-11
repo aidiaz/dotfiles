@@ -55,6 +55,22 @@ install_dependencies() {
     echo "fd (fd-find) is already installed."
   fi
 
+  # tmux
+  if ! command_exists tmux; then
+    echo "tmux not found. Adding 'tmux' to apt installation list."
+    pkgs_to_install_apt+=("tmux")
+  else
+    echo "tmux is already installed"
+  fi
+
+  # python-venv
+  if ! command_exists python3.12-venv; then
+    echo "python3.12-venv not found. Adding 'python3.12-venv' to apt installation list."
+    pkgs_to_install_apt+=("python3.12-venv")
+  else
+    echo "python3.12-venv is already installed"
+  fi
+
   # C/C++ Compilation Tools
   if ! dpkg -s build-essential >/dev/null 2>&1; then
     echo "build-essential not found. Adding to apt installation list."
