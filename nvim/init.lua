@@ -218,6 +218,9 @@ require("lazy").setup({
 			},
 		},
 	},
+	{
+		"ThePrimeagen/git-worktree.nvim",
+	},
 	-- {
 	-- 	"toppair/peek.nvim",
 	-- 	event = { "VeryLazy" },
@@ -314,10 +317,10 @@ require("lazy").setup({
 		build = "make tiktoken", -- Only on MacOS or Linux
 		opts = {},
 		keys = {
-			{ "<leader>zc", "<cmd>:CopilotChat<CR>", mode = "n", desc = "Open Copilot Chat" },
-			{ "<leader>zr", "<cmd>:CopilotChatExplain<CR>", mode = "v", desc = "Explain Code" },
-			{ "<leader>ze", "<cmd>:CopilotChatReview<CR>", mode = "v", desc = "Review Code" },
-			{ "<leader>zg", "<cmd>:CopilotChatDocs<CR>", mode = "v", desc = "Generate Docs" },
+			{ "<leader>gcc", "<cmd>:CopilotChat<CR>", mode = "n", desc = "Open Copilot Chat" },
+			{ "<leader>gce", "<cmd>:CopilotChatExplain<CR>", mode = "v", desc = "Explain Code" },
+			{ "<leader>gcr", "<cmd>:CopilotChatReview<CR>", mode = "v", desc = "Review Code" },
+			{ "<leader>gcd", "<cmd>:CopilotChatDocs<CR>", mode = "v", desc = "Generate Docs" },
 		},
 		-- See Commands section for default commands if you want to lazy load on them
 	},
@@ -443,6 +446,11 @@ require("lazy").setup({
 				{ "<leader>s", group = "[S]earch" },
 				{ "<leader>w", group = "[W]orkspace" },
 				{ "<leader>t", group = "[T]oggle" },
+				{ "<leader>v", group = "[V]env select" },
+				{ "<leader>b", group = "[B]reakpoint" },
+				{ "<leader>g", group = "[G]it/hub Copilot" },
+				{ "<leader>gc", group = "[C]opilot" },
+				{ "<leader>gw", group = "[W]orktrees" },
 				{ "<leader>h", group = "Git [H]unk", mode = { "n", "v" } },
 			},
 		},
@@ -573,6 +581,7 @@ require("lazy").setup({
 			-- Enable Telescope extensions if they are installed
 			pcall(require("telescope").load_extension, "fzf")
 			pcall(require("telescope").load_extension, "ui-select")
+			pcall(require("telescope").load_extension, "git_worktree")
 
 			-- See `:help telescope.builtin`
 			local builtin = require("telescope.builtin")
@@ -604,6 +613,12 @@ require("lazy").setup({
 				})
 			end, { desc = "[S]earch [/] in Open Files" })
 
+			vim.keymap.set("n", "<leader>gwl", function()
+				require("telescope").extensions.git_worktree.git_worktrees()
+			end, { desc = "[G]it worktrees list" })
+			vim.keymap.set("n", "<leader>gwc", function()
+				require("telescope").extensions.git_worktree.create_git_worktree()
+			end, { desc = "[C]reate worktree" })
 			-- Shortcut for searching your Neovim configuration files
 			vim.keymap.set("n", "<leader>sn", function()
 				builtin.find_files({ cwd = vim.fn.stdpath("config") })

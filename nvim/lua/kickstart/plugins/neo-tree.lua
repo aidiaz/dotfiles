@@ -11,7 +11,7 @@ return {
 	},
 	cmd = "Neotree",
 	keys = {
-		{ "<leader>ee", ":Neotree toggle<CR>", desc = "NeoTree toggle", silent = true },
+		{ "<leader>e", ":Neotree toggle<CR>", desc = "NeoTree toggle", silent = true },
 	},
 	opts = {
 		filesystem = {
