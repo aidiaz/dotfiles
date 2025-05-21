@@ -304,6 +304,7 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>vc", ":VenvSelectCached<CR>"),
 		},
 	},
+	{ "tpope/vim-fugitive" },
 	{
 		"CopilotC-Nvim/CopilotChat.nvim",
 		dependencies = {
@@ -311,9 +312,7 @@ require("lazy").setup({
 			{ "nvim-lua/plenary.nvim", branch = "master" }, -- for curl, log and async functions
 		},
 		build = "make tiktoken", -- Only on MacOS or Linux
-		opts = {
-			model = "o4-mini",
-		},
+		opts = {},
 		keys = {
 			{ "<leader>zc", "<cmd>:CopilotChat<CR>", mode = "n", desc = "Open Copilot Chat" },
 			{ "<leader>zr", "<cmd>:CopilotChatExplain<CR>", mode = "v", desc = "Explain Code" },
@@ -625,30 +624,6 @@ require("lazy").setup({
 		},
 	},
 	{ "Bilal2453/luvit-meta", lazy = true },
-	{
-		"kdheepak/lazygit.nvim",
-		lazy = true,
-		cmd = {
-			"LazyGit",
-			"LazyGitConfig",
-			"LazyGitCurrentFile",
-			"LazyGitFilter",
-			"LazyGitFilterCurrentFile",
-		},
-		-- optional for floating window border decoration
-		dependencies = {
-			"nvim-telescope/telescope.nvim",
-			"nvim-lua/plenary.nvim",
-		},
-		config = function()
-			require("telescope").load_extension("lazygit")
-		end,
-		-- setting the keybinding for LazyGit with 'keys' is recommended in
-		-- order to load the plugin when the command is run for the first time
-		keys = {
-			{ "<leader>lg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
-		},
-	},
 	{
 		-- Main LSP Configuration
 		"neovim/nvim-lspconfig",
