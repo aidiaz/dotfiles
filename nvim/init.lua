@@ -307,14 +307,35 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>vc", ":VenvSelectCached<CR>"),
 		},
 	},
-	{ "tpope/vim-fugitive" },
+	{
+		"tpope/vim-fugitive",
+		keys = {
+			{ "<leader>gfo", "<cmd>:G<CR>", mode = "n", desc = "Show git buffer" },
+			{
+				"<leader>gfc",
+				function()
+					local bufname = vim.fn.bufname()
+					if string.match(bufname, "^fugitive://") then
+						vim.cmd("q!")
+					else
+						print("Not a git buffer")
+					end
+				end,
+				mode = "n",
+				noremap = true,
+				silent = true,
+				desc = "Hide git buffer",
+			},
+			{ "<leader>gfd", "<cmd>:Gvdiffsplit<CR>", mode = "n", desc = "Diff vertical split" },
+		},
+	},
 	{
 		"CopilotC-Nvim/CopilotChat.nvim",
 		dependencies = {
 			{ "zbirenbaum/copilot.lua" }, -- or zbirenbaum/copilot.lua
 			{ "nvim-lua/plenary.nvim", branch = "master" }, -- for curl, log and async functions
 		},
-		build = "make tiktoken", -- Only on MacOS or Linux
+		build = "make tiktoken", -- Only on MacOS or Linux, what about here, is harper loadstring
 		opts = {},
 		keys = {
 			{ "<leader>gcc", "<cmd>:CopilotChat<CR>", mode = "n", desc = "Open Copilot Chat" },
@@ -450,6 +471,7 @@ require("lazy").setup({
 				{ "<leader>b", group = "[B]reakpoint" },
 				{ "<leader>g", group = "[G]it/hub Copilot" },
 				{ "<leader>gc", group = "[C]opilot" },
+				{ "<leader>gf", group = "[F]ugitive" },
 				{ "<leader>gw", group = "[W]orktrees" },
 				{ "<leader>h", group = "Git [H]unk", mode = { "n", "v" } },
 			},
@@ -1035,7 +1057,7 @@ require("lazy").setup({
 		config = function()
 			require("copilot").setup({
 				suggestion = { enabled = false },
-				panel = { enabled = false },
+				panel = { enabled = true },
 			})
 		end,
 	},
@@ -1210,11 +1232,25 @@ require("lazy").setup({
 				sections = {
 					lualine_a = { "mode" },
 					lualine_b = { "branch", "diff", "diagnostics" },
-					lualine_c = { "filename" },
+					lualine_c = { { "filename", path = 3 } },
 					lualine_x = {
 						"copilot",
 						"encoding",
 						"filetype",
+						{
+							"lsp_status",
+							icon = "", -- f013
+							symbols = {
+								-- Standard unicode symbols to cycle through for LSP progress:
+								spinner = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" },
+								-- Standard unicode symbol for when LSP is done:
+								done = "✓",
+								-- Delimiter inserted between LSP names:
+								separator = "|",
+							},
+							-- List of LSP names to ignore (e.g., `null-ls`):
+							ignore_lsp = { "copilot" },
+						},
 					},
 					lualine_y = { "progress" },
 					lualine_z = { "location" },
@@ -1256,7 +1292,7 @@ require("lazy").setup({
 					nvimtree = true,
 					treesitter = true,
 					telescope = true,
-					notify = false,
+					notify = true,
 					mini = {
 						enabled = true,
 						indentscope_color = "",
