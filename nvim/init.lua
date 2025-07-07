@@ -307,15 +307,50 @@ require("lazy").setup({
 			vim.keymap.set("n", "<leader>vc", ":VenvSelectCached<CR>"),
 		},
 	},
+	-- {
+	-- 	"tpope/vim-fugitive",
+	-- 	keys = {
+	-- 		{ "<leader>gfo", "<cmd>:G<CR>", mode = "n", desc = "Show git buffer" },
+	-- 		{
+	-- 			"<leader>gfc",
+	-- 			function()
+	-- 				local bufname = vim.fn.bufname()
+	-- 				if string.match(bufname, "^fugitive://") then
+	-- 					vim.cmd("q!")
+	-- 				else
+	-- 					print("Not a git buffer")
+	-- 				end
+	-- 			end,
+	-- 			mode = "n",
+	-- 			noremap = true,
+	-- 			silent = true,
+	-- 			desc = "Hide git buffer",
+	-- 		},
+	-- 		{ "<leader>gfd", "<cmd>:Gvdiffsplit<CR>", mode = "n", desc = "Diff vertical split" },
+	-- 	},
+	-- },
 	{
-		"tpope/vim-fugitive",
+		"NeogitOrg/neogit",
+		opts = {},
+		dependencies = {
+			"nvim-lua/plenary.nvim", -- required
+			"sindrets/diffview.nvim", -- optional - Diff integration
+
+			-- Only one of these is needed.
+			"nvim-telescope/telescope.nvim", -- optional
+			"ibhagwan/fzf-lua", -- optional
+			"echasnovski/mini.pick", -- optional
+			"folke/snacks.nvim", -- optional
+		},
 		keys = {
-			{ "<leader>gfo", "<cmd>:G<CR>", mode = "n", desc = "Show git buffer" },
+			{ "<leader>gno", "<cmd>:Neogit<CR>", mode = "n", desc = "Open Neogit" },
 			{
-				"<leader>gfc",
+				"<leader>gnc",
 				function()
-					local bufname = vim.fn.bufname()
-					if string.match(bufname, "^fugitive://") then
+					-- Get the name of the current buffer (0 means current)
+					local bufname = vim.api.nvim_buf_get_name(0)
+					-- Use string.find which is great for checking for substrings
+					if string.find(bufname, "NeogitStatus") then
 						vim.cmd("q!")
 					else
 						print("Not a git buffer")
@@ -324,9 +359,8 @@ require("lazy").setup({
 				mode = "n",
 				noremap = true,
 				silent = true,
-				desc = "Hide git buffer",
+				desc = "Close Neogit buffer",
 			},
-			{ "<leader>gfd", "<cmd>:Gvdiffsplit<CR>", mode = "n", desc = "Diff vertical split" },
 		},
 	},
 	{
@@ -479,6 +513,45 @@ require("lazy").setup({
 	},
 	{
 		"KnoP-01/rapid-for-vim",
+	},
+	{
+		"stevearc/aerial.nvim",
+		-- opts will be passed to aerial's setup function.
+		opts = {
+			-- optionally use on_attach to set keymaps when aerial has attached to a buffer
+			on_attach = function(bufnr)
+				-- Jump forwards/backwards with '{' and '}'
+				vim.keymap.set("n", "{", "<cmd>AerialPrev<CR>", { buffer = bufnr, desc = "Aerial: Previous Symbol" })
+				vim.keymap.set("n", "}", "<cmd>AerialNext<CR>", { buffer = bufnr, desc = "Aerial: Next Symbol" })
+			end,
+			-- You can add other aerial.nvim options here if needed
+			-- For example:
+			backends = { "lsp", "treesitter", "markdown" },
+			--   show_guides = true,
+		},
+		-- keys defines keymaps that will trigger the plugin to load if it's not already loaded.
+		keys = {
+			{
+				"<leader>a",
+				"<cmd>AerialToggle!<CR>",
+				desc = "Toggle Aerial Outline",
+			},
+		},
+		filter_kind = {
+			"Class",
+			"Constructor",
+			"Function",
+			"Method",
+		},
+		-- Optional: Specify dependencies if not managed elsewhere
+		-- dependencies = {
+		--   "nvim-treesitter/nvim-treesitter", -- If using the treesitter backend
+		--   "neovim/nvim-lspconfig",         -- If using the LSP backend
+		-- },
+		-- Optional: You can also trigger loading on certain events or commands
+		-- cmd = { "AerialToggle", "AerialOpen", "AerialClose", "AerialInfo" },
+		-- event = { "BufReadPre .lua", "BufReadPre.rs", "LspAttach" }, -- Example events
+		-- For a truly "lazy" setup primarily triggered by the keymap, the keys entry is often sufficient.
 	},
 	-- {
 	-- 	"nomnivore/ollama.nvim",
