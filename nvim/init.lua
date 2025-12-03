@@ -515,6 +515,14 @@ require("lazy").setup({
 		"KnoP-01/rapid-for-vim",
 	},
 	{
+		"nosduco/remote-sshfs.nvim",
+		dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" },
+		opts = {
+			-- Refer to the configuration section below
+			-- or leave empty for defaults
+		},
+	},
+	{
 		"stevearc/aerial.nvim",
 		-- opts will be passed to aerial's setup function.
 		opts = {
@@ -1107,6 +1115,7 @@ require("lazy").setup({
 				json = { "prettier" },
 				html = { "prettier" },
 				javascript = { "prettier" },
+				markdown = { "prettier" },
 				--
 				-- You can use 'stop_after_first' to run the first available formatter from the list
 				-- javascript = { "prettierd", "prettier", stop_after_first = true },
@@ -1116,7 +1125,7 @@ require("lazy").setup({
 					prepend_args = {
 						"--fast",
 						"--line-length",
-						"79",
+						"80",
 					},
 				},
 			},
