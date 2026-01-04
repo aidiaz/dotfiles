@@ -167,6 +167,7 @@ vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 vim.opt.foldcolumn = "0"
 vim.opt.foldtext = ""
 vim.o.foldlevel = 99
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -363,22 +364,6 @@ require("lazy").setup({
 			},
 		},
 	},
-	{
-		"CopilotC-Nvim/CopilotChat.nvim",
-		dependencies = {
-			{ "zbirenbaum/copilot.lua" }, -- or zbirenbaum/copilot.lua
-			{ "nvim-lua/plenary.nvim", branch = "master" }, -- for curl, log and async functions
-		},
-		build = "make tiktoken", -- Only on MacOS or Linux, what about here, is harper loadstring
-		opts = {},
-		keys = {
-			{ "<leader>gcc", "<cmd>:CopilotChat<CR>", mode = "n", desc = "Open Copilot Chat" },
-			{ "<leader>gce", "<cmd>:CopilotChatExplain<CR>", mode = "v", desc = "Explain Code" },
-			{ "<leader>gcr", "<cmd>:CopilotChatReview<CR>", mode = "v", desc = "Review Code" },
-			{ "<leader>gcd", "<cmd>:CopilotChatDocs<CR>", mode = "v", desc = "Generate Docs" },
-		},
-		-- See Commands section for default commands if you want to lazy load on them
-	},
 	-- NOTE: Plugins can also be configured to run Lua code when they are loaded.
 	--
 	-- This is often very useful to both group configuration, as well as handle
@@ -503,7 +488,6 @@ require("lazy").setup({
 				{ "<leader>t", group = "[T]oggle" },
 				{ "<leader>v", group = "[V]env select" },
 				{ "<leader>b", group = "[B]reakpoint" },
-				{ "<leader>g", group = "[G]it/hub Copilot" },
 				{ "<leader>gc", group = "[C]opilot" },
 				{ "<leader>gf", group = "[F]ugitive" },
 				{ "<leader>gw", group = "[W]orktrees" },
@@ -1134,17 +1118,6 @@ require("lazy").setup({
 		},
 	},
 	{
-		"zbirenbaum/copilot.lua",
-		cmd = "Copilot",
-		event = "InsertEnter",
-		config = function()
-			require("copilot").setup({
-				suggestion = { enabled = false },
-				panel = { enabled = true },
-			})
-		end,
-	},
-	{
 		"lukas-reineke/virt-column.nvim",
 		config = function()
 			require("virt-column").setup({
@@ -1157,7 +1130,6 @@ require("lazy").setup({
 			})
 		end,
 	},
-	{ "giuxtaposition/blink-cmp-copilot" },
 	{ -- Autocompletion
 		"saghen/blink.cmp",
 		event = "VimEnter",
@@ -1190,7 +1162,6 @@ require("lazy").setup({
 				opts = {},
 			},
 
-			{ "giuxtaposition/blink-cmp-copilot" },
 			"folke/lazydev.nvim",
 		},
 		--- @module 'blink.cmp'
@@ -1238,15 +1209,9 @@ require("lazy").setup({
 
 			sources = {
 				-- default = { "lsp", "path", "snippets", "lazydev", "emoji", "dictionary", "copilot" },
-				default = { "lsp", "path", "snippets", "lazydev", "copilot" },
+				default = { "lsp", "path", "snippets", "lazydev" },
 				providers = {
 					lazydev = { module = "lazydev.integrations.blink", score_offset = 100 },
-					copilot = {
-						name = "copilot",
-						module = "blink-cmp-copilot",
-						score_offset = -100,
-						async = true,
-					},
 				},
 			},
 
@@ -1265,7 +1230,6 @@ require("lazy").setup({
 			signature = { enabled = true },
 		},
 	},
-	{ "AndreM222/copilot-lualine" },
 	{
 		"nvim-lualine/lualine.nvim",
 		dependencies = { "nvim-tree/nvim-web-devicons" },
@@ -1295,7 +1259,6 @@ require("lazy").setup({
 					lualine_b = { "branch", "diff", "diagnostics" },
 					lualine_c = { { "filename", path = 3 } },
 					lualine_x = {
-						"copilot",
 						"encoding",
 						"filetype",
 						{
@@ -1310,7 +1273,6 @@ require("lazy").setup({
 								separator = "|",
 							},
 							-- List of LSP names to ignore (e.g., `null-ls`):
-							ignore_lsp = { "copilot" },
 						},
 					},
 					lualine_y = { "progress" },
@@ -1367,12 +1329,6 @@ require("lazy").setup({
 			vim.cmd.colorscheme("catppuccin")
 		end,
 	},
-	-- {
-	-- 	"zbirenbaum/copilot-cmp",
-	-- 	config = function()
-	-- 		require("copilot_cmp").setup()
-	-- 	end,
-	-- },
 	-- Highlight todo, notes, etc in comments
 	{
 		"folke/todo-comments.nvim",
@@ -1475,6 +1431,12 @@ require("lazy").setup({
 		--    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
 		--    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
 		--    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+		{
+			"dhruvasagar/vim-table-mode",
+			config = function()
+				vim.g.table_mode_corner = "|"
+			end,
+		},
 	},
 
 	-- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
