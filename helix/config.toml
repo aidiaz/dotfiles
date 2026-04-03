@@ -1,0 +1,81 @@
+theme = "catppuccin_mocha"
+
+[editor]
+line-number = "absolute"
+mouse = true
+cursorline = true
+scrolloff = 10
+color-modes = true
+true-color = true
+bufferline = "multiple"
+rulers = [80]
+shell = ["zsh", "-c"]
+gutters = ["diagnostics", "spacer", "line-numbers", "spacer", "diff"]
+auto-format = true
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
+[editor.file-picker]
+hidden = false
+
+[editor.lsp]
+display-messages = true
+display-inlay-hints = true
+
+[editor.indent-guides]
+render = true
+character = "│"
+skip-levels = 1
+
+[editor.statusline]
+left = ["mode", "spinner", "file-name", "read-only-indicator", "file-modification-indicator"]
+center = []
+right = ["diagnostics", "selections", "register", "position", "file-encoding", "file-type", "version-control"]
+separator = "│"
+mode.normal = "NORMAL"
+mode.insert = "INSERT"
+mode.select = "SELECT"
+
+[editor.whitespace.render]
+tab = "all"
+space = "none"
+nbsp = "all"
+newline = "none"
+
+[editor.whitespace.characters]
+tab = "→"
+space = "·"
+nbsp = "⍽"
+newline = "⏎"
+tabpad = " "
+
+[editor.soft-wrap]
+enable = true
+
+# ── Keymaps ──────────────────────────────────────────────────
+
+[keys.normal]
+# Window navigation with Ctrl+hjkl (matches your nvim/tmux setup)
+C-h = "jump_view_left"
+C-j = "jump_view_down"
+C-k = "jump_view_up"
+C-l = "jump_view_right"
+
+# Clear search highlight on Esc (like your nvim <Esc> nohlsearch)
+esc = ["collapse_selection", "keep_primary_selection"]
+
+# Quick save
+C-s = ":write"
+
+
+[keys.insert]
+C-s = ":write"
+
+[keys.select]
+C-h = "jump_view_left"
+C-j = "jump_view_down"
+C-k = "jump_view_up"
+C-l = "jump_view_right"
