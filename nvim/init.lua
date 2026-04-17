@@ -53,6 +53,12 @@ vim.g.maplocalleader = " "
 vim.g.have_nerd_font = true
 
 vim.api.nvim_set_keymap("n", "<Right>", "<Nop>", { noremap = true, silent = true })
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "python" },
+	callback = function()
+		vim.treesitter.start()
+	end,
+})
 -- [[ Setting options ]]
 -- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!
@@ -1027,7 +1033,6 @@ require("lazy").setup({
 				"markdownlint",
 				"flake8",
 				"jsonlint",
-				"yaml-language-server",
 				"yamllint",
 				"prettier",
 				"docker-compose-language-service",
@@ -1297,6 +1302,15 @@ require("lazy").setup({
 		"stevearc/dressing.nvim",
 		opts = {},
 	},
+	{
+		"MeanderingProgrammer/render-markdown.nvim",
+		dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-mini/mini.nvim" }, -- if you use the mini.nvim suite
+		-- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-mini/mini.icons' },        -- if you use standalone mini plugins
+		-- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+		---@module 'render-markdown'
+		---@type render.md.UserConfig
+		opts = {},
+	},
 	{ -- You can easily change to a different colorscheme.
 		-- Change the name of the colorscheme plugin below, and then
 		-- change the command in the config to whatever the name of that colorscheme is.
@@ -1376,6 +1390,7 @@ require("lazy").setup({
 	},
 	{ -- Highlight, edit, and navigate code
 		"nvim-treesitter/nvim-treesitter",
+		branch = "master",
 		build = ":TSUpdate",
 		dependencies = {
 			"windwp/nvim-ts-autotag",
