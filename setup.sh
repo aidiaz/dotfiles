@@ -214,6 +214,7 @@ config_targets_to_ensure_parents_for=(
     "$config_folder/tmux/tmux.conf"
     "$config_folder/ohmyposh/catppuccin.omp.json"
     "$config_folder/nvim"
+    "$config_folder/kitty"
 )
 for target_path in "${config_targets_to_ensure_parents_for[@]}"; do
   mkdir -p "$(dirname "$target_path")"
@@ -257,6 +258,8 @@ symlinks=(
   ["$DOTFILES_DIR/.gitconfig"]="$HOME/.gitconfig"
   ["$DOTFILES_DIR/tmux/tmux.conf"]="$config_folder/tmux/tmux.conf"
   ["$DOTFILES_DIR/ohmyposh/catppuccin.omp.json"]="$config_folder/ohmyposh/catppuccin.omp.json"
+  ["$DOTFILES_DIR/kitty"]="$config_folder/kitty"
+  ["$DOTFILES_DIR/.claude/agents"]="$HOME/.claude/agents"
 )
 
 for source in "${(@k)symlinks}"; do
@@ -287,6 +290,12 @@ for source in "${(@k)symlinks}"; do
     echo "Linked file: $source -> $target"
   fi
 done
+
+# Claude skills: symlink authored skills into their runtime locations (idempotent).
+if [ -x "$DOTFILES_DIR/.claude/skills/install.sh" ]; then
+  echo "Installing Claude skills..."
+  "$DOTFILES_DIR/.claude/skills/install.sh"
+fi
 
 echo "Setup complete!"
 echo "---------------------------------------------------------------------"
