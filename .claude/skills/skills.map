@@ -1,0 +1,13 @@
+# Claude skills install map.  Columns (whitespace-separated):
+#   <scope dir under this skills/ folder>   <install target under $HOME>   <mode>
+#
+# mode=each : fan each child skill into target/<skill>. Use when the target is
+#             shared with other skill sources (e.g. ~/.claude/skills also holds
+#             tool-managed skills symlinked from ~/.agents/skills).
+# mode=dir  : target itself becomes a symlink to the scope dir (repo owns it).
+#
+# Edit this file when a project repo lives at a non-standard path or a new
+# project gains its first skill, then run ./install.sh
+global          .claude/skills                  each
+projects/vera   developer/vera/.claude/skills   dir
+projects/1ta    developer/1ta/.claude/skills    dir

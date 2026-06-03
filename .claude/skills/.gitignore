@@ -1,0 +1,7 @@
+# Large binary skill assets — kept on disk, not committed.
+# (e.g. w-skin-sentinel grain reference photos, ~13M each)
+**/grain_references/
+
+# Python build artifacts from skill scripts.
+**/__pycache__/
+*.pyc

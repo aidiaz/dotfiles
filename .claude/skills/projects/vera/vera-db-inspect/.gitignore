@@ -1,0 +1,4 @@
+# Never commit credentials for the production read-only mirror.
+secrets.env
+*.env
+*.local
