@@ -31,4 +31,11 @@ Engineering defaults:
 - Secrets from the environment, never in code.
 - After changes, run pytest, ruff, and basedpyright.
 
+Observability -- wire these in for any service that ships:
+- Logging: structlog as the facade (not bare `logging`). Bind `request_id`/`user_id`/`path` once per request via middleware and call `clear_contextvars()` at request start to avoid cross-request leaks. Keyword args, never f-strings, so fields stay indexable. Never log PII/secrets/tokens; exclude health and metrics endpoints.
+- Exceptions: a `DomainError` base (-> 400/422) and an `InfrastructureError` base (-> 502/503 with `Retry-After`), one `exceptions.py` per domain package. Don't catch `Exception` in routes -- let it reach a global handler; catch specific errors at the service layer where you can retry/compensate. Raise `ValueError` in Pydantic validators (FastAPI auto-converts to 422).
+- Error responses: RFC 7807 `application/problem+json` (`type`/`title`/`status`/`detail`/`instance`), serialized centrally in `@app.exception_handler` registrations -- routes only raise. 500s never leak stack traces; log server-side, return a static detail. Declare them in route `responses=` so OpenAPI reflects them.
+- Tracing/metrics: OpenTelemetry (`TracerProvider` + `MeterProvider`) initialized before the app is created; auto-instrument FastAPI, SQLAlchemy (SQLModel sits on it), and the HTTP client; export OTLP gRPC to a local collector; `BatchSpanProcessor` in prod. RED metrics per endpoint plus domain counters/histograms; `ParentBased` sampling at 10-25%.
+- Health: three endpoints, not combined -- `/health/live` (process only, no deps), `/health/ready` (critical deps respond), `/health` (per-dep JSON for dashboards). Exclude them from tracing, logging, and rate limiting.
+
 When requirements are ambiguous, ask before assuming. Explain non-obvious architectural trade-offs briefly; skip generic best-practice lectures. Deliver runnable, production-ready code.
